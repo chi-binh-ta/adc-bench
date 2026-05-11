@@ -1,0 +1,25 @@
+{
+  "chosen_algorithm": "hash set complement lookup",
+  "hypotheses": [
+    "try all pairs with nested loops",
+    "sort and use two pointers",
+    "scan once while storing previously seen values in a hash set"
+  ],
+  "rejected_algorithms": [
+    {
+      "name": "brute force nested loops",
+      "reason": "It is quadratic O(n^2), so it fails the expected linear-time complexity requirement."
+    }
+  ],
+  "invariant": "After processing each element, seen contains exactly the values from distinct earlier positions; if the current complement is in seen, a valid pair exists.",
+  "complexity_time": "O(n)",
+  "complexity_space": "O(n)",
+  "edge_cases": [
+    "empty list",
+    "single element cannot pair with itself",
+    "duplicate values",
+    "negative numbers",
+    "no pair exists"
+  ],
+  "counterexample_for_wrong_approach": "Using the same element twice would incorrectly return true for nums=[5], target=10."
+}

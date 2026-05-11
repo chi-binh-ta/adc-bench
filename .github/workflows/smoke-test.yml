@@ -1,4 +1,4 @@
-﻿name: Smoke Test
+name: Smoke Test
 
 on:
   push:
@@ -44,3 +44,25 @@ jobs:
       - name: Run baseline agent
         working-directory: ${{ steps.project.outputs.dir }}
         run: python examples/run_baseline.py
+
+      - name: Verify sample two_sum_hash submission
+        working-directory: ${{ steps.project.outputs.dir }}
+        shell: bash
+        run: |
+          python -m adc_bench.verifier tasks/known/two_sum_hash examples/sample_submissions/two_sum_hash 5 | tee verifier_result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("verifier_result.json").read_text(encoding="utf-8-sig"))
+
+          assert result["passed_public"] is True, result
+          assert result["passed_hidden"] is True, result
+          assert result["passed_stress"] is True, result
+          assert result["correctness"] == 1.0, result
+          assert result["complexity"] == 1.0, result
+          assert result["anti_cheat"] == 1.0, result
+          assert result["trace_quality"] >= 0.7, result
+
+          print("Verifier smoke test passed.")
+          PY
