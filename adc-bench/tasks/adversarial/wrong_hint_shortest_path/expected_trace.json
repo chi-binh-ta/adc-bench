@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["dijkstra", "priority", "heap"],
+  "invariant_keywords": ["settled", "shortest", "relax"],
+  "complexity_time_keywords": ["O((n+m) log n)", "O(E log V)", "heap"],
+  "rejected_keywords": ["bfs", "misleading", "weighted"],
+  "edge_case_keywords": ["unreachable", "expensive", "weighted"]
+}

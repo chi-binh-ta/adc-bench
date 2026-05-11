@@ -1,0 +1,11 @@
+{
+  "task_id": "adversarial/wrong_hint_shortest_path",
+  "family": "shortest_path",
+  "split": "adversarial",
+  "target_algorithm": "Dijkstra despite misleading BFS hint",
+  "expected_complexity": "O((n + m) log n) time, O(n + m) space",
+  "difficulty": "medium",
+  "requires_invariant": true,
+  "requires_counterexample": true,
+  "anti_cheat": true
+}

@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["deque", "monotonic", "indices"],
+  "invariant_keywords": ["decreasing", "candidate", "window"],
+  "complexity_time_keywords": ["O(n)", "linear"],
+  "rejected_keywords": ["scan", "O(nk)", "brute"],
+  "edge_case_keywords": ["duplicate", "negative", "k"]
+}

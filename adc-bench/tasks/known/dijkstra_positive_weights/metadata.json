@@ -1,0 +1,11 @@
+{
+  "task_id": "known/dijkstra_positive_weights",
+  "family": "shortest_path",
+  "split": "known",
+  "target_algorithm": "Dijkstra priority queue relaxation",
+  "expected_complexity": "O((n + m) log n) time, O(n + m) space",
+  "difficulty": "medium",
+  "requires_invariant": true,
+  "requires_counterexample": true,
+  "anti_cheat": true
+}

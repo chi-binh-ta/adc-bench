@@ -1,0 +1,11 @@
+{
+  "task_id": "composed/sliding_window_max_deque",
+  "family": "monotonic_structures",
+  "split": "composed",
+  "target_algorithm": "monotonic deque sliding window maximum",
+  "expected_complexity": "O(n) time, O(k) space",
+  "difficulty": "medium",
+  "requires_invariant": true,
+  "requires_counterexample": false,
+  "anti_cheat": true
+}

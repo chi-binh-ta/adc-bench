@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["state", "time_mod", "bfs"],
+  "invariant_keywords": ["node", "mod", "visited"],
+  "complexity_time_keywords": ["O(nk", "O((n+m)k)", "linear"],
+  "rejected_keywords": ["normal bfs", "ignore time", "plain reachability"],
+  "edge_case_keywords": ["wait", "unreachable", "different mod"]
+}

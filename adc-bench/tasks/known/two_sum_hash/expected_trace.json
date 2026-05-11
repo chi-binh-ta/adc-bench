@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["hash", "set", "complement"],
+  "invariant_keywords": ["seen", "complement", "distinct"],
+  "complexity_time_keywords": ["O(n)", "linear"],
+  "rejected_keywords": ["brute", "quadratic", "nested"],
+  "edge_case_keywords": ["duplicate", "negative", "no pair"]
+}

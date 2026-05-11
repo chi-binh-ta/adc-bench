@@ -1,0 +1,11 @@
+{
+  "task_id": "known/valid_parentheses_stack",
+  "family": "stack_parsing",
+  "split": "known",
+  "target_algorithm": "stack-based bracket matching",
+  "expected_complexity": "O(n) time, O(n) space",
+  "difficulty": "easy",
+  "requires_invariant": true,
+  "requires_counterexample": true,
+  "anti_cheat": true
+}

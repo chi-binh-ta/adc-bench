@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["prefix", "parity", "merge"],
+  "invariant_keywords": ["merged", "xor", "prefix"],
+  "complexity_time_keywords": ["O(n + m log m)", "sort", "prefix"],
+  "rejected_keywords": ["scan", "per interval", "brute"],
+  "edge_case_keywords": ["overlap", "touching", "empty"]
+}

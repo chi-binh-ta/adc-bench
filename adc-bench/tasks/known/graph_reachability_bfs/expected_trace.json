@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["bfs", "dfs", "frontier"],
+  "invariant_keywords": ["visited", "reachable", "frontier"],
+  "complexity_time_keywords": ["O(n + m)", "O(V+E)", "linear"],
+  "rejected_keywords": ["direct", "single edge", "one hop"],
+  "edge_case_keywords": ["cycle", "source equals target", "disconnected"]
+}

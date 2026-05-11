@@ -1,0 +1,11 @@
+{
+  "task_id": "composed/two_sat_scc",
+  "family": "constraint_satisfaction",
+  "split": "composed",
+  "target_algorithm": "implication graph strongly connected components",
+  "expected_complexity": "O(n + m) time, O(n + m) space",
+  "difficulty": "hard",
+  "requires_invariant": true,
+  "requires_counterexample": true,
+  "anti_cheat": true
+}

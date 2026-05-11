@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["stack", "last", "nested"],
+  "invariant_keywords": ["stack", "unmatched", "opening"],
+  "complexity_time_keywords": ["O(n)", "linear"],
+  "rejected_keywords": ["count", "counter", "frequency"],
+  "edge_case_keywords": ["empty", "closing", "([)]"]
+}

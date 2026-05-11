@@ -1,0 +1,11 @@
+{
+  "task_id": "synthetic/parity_interval_merge",
+  "family": "interval_prefix",
+  "split": "synthetic",
+  "target_algorithm": "prefix parity with interval merging",
+  "expected_complexity": "O(n + m log m) time, O(n + m) space",
+  "difficulty": "medium",
+  "requires_invariant": true,
+  "requires_counterexample": true,
+  "anti_cheat": true
+}

@@ -1,0 +1,11 @@
+{
+  "task_id": "composed/xor_sat_f2",
+  "family": "constraint_satisfaction",
+  "split": "composed",
+  "target_algorithm": "Gaussian elimination over GF(2)",
+  "expected_complexity": "Polynomial in variables and equations",
+  "difficulty": "hard",
+  "requires_invariant": true,
+  "requires_counterexample": true,
+  "anti_cheat": true
+}

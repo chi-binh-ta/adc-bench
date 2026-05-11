@@ -1,0 +1,11 @@
+{
+  "task_id": "known/graph_reachability_bfs",
+  "family": "reachability",
+  "split": "known",
+  "target_algorithm": "BFS or DFS graph reachability",
+  "expected_complexity": "O(n + m) time, O(n + m) space",
+  "difficulty": "easy",
+  "requires_invariant": true,
+  "requires_counterexample": false,
+  "anti_cheat": true
+}

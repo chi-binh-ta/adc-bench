@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["gaussian", "elimination", "gf(2)"],
+  "invariant_keywords": ["rank", "row", "linear"],
+  "complexity_time_keywords": ["O(n", "polynomial", "cubic"],
+  "rejected_keywords": ["brute", "assignment", "2^n"],
+  "edge_case_keywords": ["contradiction", "dependent", "duplicate"]
+}

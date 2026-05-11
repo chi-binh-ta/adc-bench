@@ -1,0 +1,11 @@
+{
+  "task_id": "synthetic/rotating_key_reachability",
+  "family": "reachability",
+  "split": "synthetic",
+  "target_algorithm": "BFS over expanded (node, time_mod) state",
+  "expected_complexity": "O((n + m) * k) time, O(n * k) space",
+  "difficulty": "medium",
+  "requires_invariant": true,
+  "requires_counterexample": true,
+  "anti_cheat": true
+}

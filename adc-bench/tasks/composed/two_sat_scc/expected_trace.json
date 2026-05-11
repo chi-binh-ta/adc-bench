@@ -1,0 +1,7 @@
+{
+  "target_keywords": ["scc", "strongly connected", "implication"],
+  "invariant_keywords": ["variable", "negation", "component"],
+  "complexity_time_keywords": ["O(n + m)", "linear"],
+  "rejected_keywords": ["brute", "assignment", "2^n"],
+  "edge_case_keywords": ["contradiction", "unit", "cycle"]
+}
