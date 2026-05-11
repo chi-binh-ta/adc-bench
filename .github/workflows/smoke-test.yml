@@ -78,6 +78,9 @@ jobs:
 
           result = json.loads(Path("self_improve_result.json").read_text(encoding="utf-8-sig"))
 
+          assert result["split_is_disjoint"] is True, result
+          assert result["split_overlap_tasks"] == [], result
+          assert result["heldout_task_count"] >= 1, result
           assert result["candidate_average_score"] >= result["baseline_average_score"], result
           assert result["self_improve_score"] > 0, result
           assert result["anti_cheat"] == 1.0, result

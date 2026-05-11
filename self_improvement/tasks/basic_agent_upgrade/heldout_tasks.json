@@ -1,5 +1,4 @@
 [
-  "tasks/known/two_sum_hash",
-  "tasks/known/valid_parentheses_stack",
-  "tasks/known/graph_reachability_bfs"
+  "tasks/known/graph_reachability_bfs",
+  "tasks/known/dijkstra_positive_weights"
 ]

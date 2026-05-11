@@ -1,6 +1,6 @@
 # Self-Improvement Tasks
 
-ADC-bench v0.3.0 adds an offline self-improvement layer. A self-improvement task
+ADC-bench v0.3.1 includes an offline self-improvement layer. A self-improvement task
 packages:
 
 - a weak baseline agent,
@@ -12,6 +12,9 @@ packages:
 The evaluator does not run live recursive self-modification. Instead, it
 compares a fixed baseline agent directory and a fixed candidate agent directory
 on the held-out tasks.
+
+As of v0.3.1, `train_tasks.json` and `heldout_tasks.json` must be disjoint by
+default. Use `--allow-overlap` only when debugging legacy experiments.
 
 Run the sample:
 

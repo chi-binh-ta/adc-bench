@@ -472,7 +472,7 @@ The current anti-cheat system is designed to catch obvious violations in a resea
 
 ## 18. Task Splits
 
-ADC-bench v0.3.0 contains four task splits:
+ADC-bench v0.3.1 contains four task splits:
 
 ```text
 tasks/
@@ -540,7 +540,7 @@ These tasks may include misleading hints, hidden complexity traps, or cases wher
 
 ## 19. Current Initial Task Set
 
-ADC-bench v0.3.0 includes 10 initial algorithm tasks:
+ADC-bench v0.3.1 includes 10 initial algorithm tasks:
 
 ```text
 known/two_sum_hash
@@ -687,7 +687,7 @@ Note: `adc_score_partial` does not include full transfer and robustness scoring.
 
 ## Self-Improving Agent Layer
 
-ADC-bench v0.3.0 adds an offline self-improvement benchmark layer. It evaluates
+ADC-bench v0.3.1 includes an offline self-improvement benchmark layer. It evaluates
 whether a candidate agent improves over a weak baseline agent on held-out
 algorithm discovery tasks.
 
@@ -715,6 +715,10 @@ improvement_trace_quality
 anti_cheat
 reproducibility
 self_improve_score
+split_is_disjoint
+split_overlap_tasks
+train_task_count
+heldout_task_count
 ```
 
 The scoring formula is:
@@ -743,6 +747,34 @@ This layer is offline and reproducible. It does not perform live recursive
 self-modification; it compares two fixed agent directories after the candidate
 has already been produced. The anti-cheat checks are lightweight and intended
 for local research, not as a secure sandbox.
+
+### Strict train/heldout split
+
+`train_tasks.json` and `heldout_tasks.json` must be disjoint. ADC-bench v0.3.1
+enforces this by default for self-improvement evaluation. If a split overlaps,
+the evaluator returns a structured result with score `0.0`, `split_is_disjoint`
+set to `false`, and `split_overlap_tasks` listing the overlapping tasks.
+
+Use `--allow-overlap` only for debugging legacy experiments. Even with that
+flag, the result still reports:
+
+```text
+split_is_disjoint
+split_overlap_tasks
+train_task_count
+heldout_task_count
+```
+
+Strict split sample command:
+
+```bash
+python -m adc_bench.cli self-improve-eval \
+  --baseline-agent agents/agent_v0 \
+  --candidate-agent examples/sample_self_improve \
+  --task self_improvement/tasks/basic_agent_upgrade \
+  --timeout 5 \
+  --format text
+```
 
 
 ## 22. Result Format
@@ -922,7 +954,7 @@ ADC-bench is currently a research prototype for studying algorithm discovery beh
 
 ## 29. Limitations
 
-ADC-bench v0.3.0 has several known limitations:
+ADC-bench v0.3.1 has several known limitations:
 
 1. The local sandbox is not secure against malicious code.
 2. Trace scoring is heuristic.
@@ -940,7 +972,8 @@ Planned improvements:
 
 ```text
 v0.3.0 — Offline self-improving agent layer
-v0.3.1 — Better improvement traces and richer held-out suites
+v0.3.1 — Strict disjoint self-improvement splits
+v0.3.2 — Better improvement traces and richer held-out suites
 v0.4   — Stronger synthetic task generation
 v0.5   — Human-verified task subset
 v1.0   — Stable benchmark release
@@ -950,7 +983,7 @@ v1.0   — Stable benchmark release
 
 ## 31. Current Direction: Self-Improving Agent Layer
 
-ADC-bench v0.3.0 includes tasks where an offline candidate agent is evaluated
+ADC-bench v0.3.1 includes tasks where an offline candidate agent is evaluated
 against a weak baseline. The candidate receives:
 
 ```text
@@ -975,7 +1008,7 @@ Score(candidate_agent) > Score(agent_v0)
 ```
 
 on held-out tasks. This moves ADC-bench from algorithm discovery toward
-reproducible agent improvement while keeping v0.3.0 deterministic and offline.
+reproducible agent improvement while keeping v0.3.1 deterministic and offline.
 
 ---
 

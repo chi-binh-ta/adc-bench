@@ -3,22 +3,28 @@
   "observed_failures": [
     "agent_v0 keeps starter implementations and writes a weak trace",
     "two_sum_hash needs a hash set because the starter fails stress behavior",
-    "valid_parentheses_stack needs order-sensitive stack logic",
-    "graph_reachability_bfs needs more than a direct edge check"
+    "valid_parentheses_stack needs order-sensitive stack logic"
+  ],
+  "split_policy": [
+    "The v0.3.1 evaluation uses a disjoint heldout split",
+    "Training tasks are used only for diagnosing weak agent behavior",
+    "Heldout tasks are not used as failure logs"
   ],
   "strategy": [
     "Read visible problem and metadata files",
     "Use the task id to select a small known algorithm template",
-    "Emit a task-specific trace that names the algorithm, invariant, complexity, and rejected approach"
+    "Emit a task-specific trace that names the algorithm, invariant, complexity, and rejected approach",
+    "Improve through reusable algorithm templates instead of copying train task outputs"
   ],
   "changes_made": [
     "Generate hash set complement lookup for two_sum_hash",
     "Generate stack-based bracket matching for valid_parentheses_stack",
     "Generate BFS frontier traversal for graph_reachability_bfs",
+    "Generate Dijkstra priority queue relaxation for dijkstra_positive_weights",
     "Generate stronger trace files"
   ],
   "generalization": [
-    "The candidate applies simple known task patterns to held-out known tasks",
+    "The candidate applies simple known task patterns to disjoint held-out known tasks",
     "Unknown tasks fall back to starter code with a transparent weak trace"
   ],
   "anti_cheat": [

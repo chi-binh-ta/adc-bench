@@ -43,6 +43,10 @@ class SelfImproveResult:
     task_dir: str
     baseline_agent_dir: str
     candidate_agent_dir: str
+    train_task_count: int
+    heldout_task_count: int
+    split_is_disjoint: bool
+    split_overlap_tasks: list[str]
     train_tasks: list[str]
     heldout_tasks: list[str]
     baseline_results: dict[str, dict[str, Any]]
@@ -84,6 +88,16 @@ def load_task_list(path: Path) -> list[Path]:
             raise FileNotFoundError(f"Task path from {path} does not exist: {item}")
         tasks.append(resolved.resolve())
     return tasks
+
+
+def validate_disjoint_splits(train_tasks: list[Path], heldout_tasks: list[Path]) -> tuple[bool, list[str]]:
+    train_by_identity = {_task_identity(task): task for task in train_tasks}
+    overlaps: list[str] = []
+    for task in heldout_tasks:
+        identity = _task_identity(task)
+        if identity in train_by_identity:
+            overlaps.append(_display_task(train_by_identity[identity]))
+    return not overlaps, sorted(overlaps)
 
 
 def run_agent_on_tasks(
@@ -186,6 +200,7 @@ def evaluate_self_improvement(
     candidate_agent_dir: Path,
     self_improve_task_dir: Path,
     timeout_seconds: float = 5.0,
+    strict_split: bool = True,
 ) -> SelfImproveResult:
     task_dir = self_improve_task_dir.resolve()
     baseline_agent_dir = baseline_agent_dir.resolve()
@@ -201,6 +216,22 @@ def evaluate_self_improvement(
             baseline_agent_dir=baseline_agent_dir,
             candidate_agent_dir=candidate_agent_dir,
             errors=[str(exc)],
+        )
+
+    split_is_disjoint, split_overlap_tasks = validate_disjoint_splits(train_tasks, heldout_tasks)
+    if strict_split and not split_is_disjoint:
+        return _empty_result(
+            task_dir=task_dir,
+            baseline_agent_dir=baseline_agent_dir,
+            candidate_agent_dir=candidate_agent_dir,
+            errors=[
+                "train_tasks and heldout_tasks must be disjoint; "
+                f"overlap: {', '.join(split_overlap_tasks)}"
+            ],
+            train_tasks=train_tasks,
+            heldout_tasks=heldout_tasks,
+            split_is_disjoint=split_is_disjoint,
+            split_overlap_tasks=split_overlap_tasks,
         )
 
     anti_cheat, anti_cheat_violations = _scan_agent(candidate_agent_dir / "agent.py")
@@ -247,6 +278,10 @@ def evaluate_self_improvement(
         task_dir=str(task_dir),
         baseline_agent_dir=str(baseline_agent_dir),
         candidate_agent_dir=str(candidate_agent_dir),
+        train_task_count=len(train_tasks),
+        heldout_task_count=len(heldout_tasks),
+        split_is_disjoint=split_is_disjoint,
+        split_overlap_tasks=split_overlap_tasks,
         train_tasks=[_display_task(task) for task in train_tasks],
         heldout_tasks=[_display_task(task) for task in heldout_tasks],
         baseline_results=baseline_results,
@@ -273,6 +308,13 @@ def format_self_improve_text_report(result: SelfImproveResult) -> str:
         f"Task: {_relativize(Path(result.task_dir))}",
         f"Baseline agent: {_relativize(Path(result.baseline_agent_dir))}",
         f"Candidate agent: {_relativize(Path(result.candidate_agent_dir))}",
+        f"Train tasks: {result.train_task_count}",
+        f"Held-out tasks: {result.heldout_task_count}",
+        f"Split is disjoint: {result.split_is_disjoint}",
+    ]
+    if result.split_overlap_tasks:
+        lines.append(f"Split overlaps: {', '.join(result.split_overlap_tasks)}")
+    lines.extend([
         "",
         "Scores",
         "------",
@@ -288,7 +330,7 @@ def format_self_improve_text_report(result: SelfImproveResult) -> str:
         "",
         "Held-out Tasks",
         "--------------",
-    ]
+    ])
 
     for task_id in sorted(result.candidate_results):
         baseline_score = result.baseline_results.get(task_id, {}).get("adc_score", 0.0)
@@ -426,13 +468,23 @@ def _empty_result(
     baseline_agent_dir: Path,
     candidate_agent_dir: Path,
     errors: list[str],
+    train_tasks: list[Path] | None = None,
+    heldout_tasks: list[Path] | None = None,
+    split_is_disjoint: bool = True,
+    split_overlap_tasks: list[str] | None = None,
 ) -> SelfImproveResult:
+    train_tasks = train_tasks or []
+    heldout_tasks = heldout_tasks or []
     return SelfImproveResult(
         task_dir=str(task_dir),
         baseline_agent_dir=str(baseline_agent_dir),
         candidate_agent_dir=str(candidate_agent_dir),
-        train_tasks=[],
-        heldout_tasks=[],
+        train_task_count=len(train_tasks),
+        heldout_task_count=len(heldout_tasks),
+        split_is_disjoint=split_is_disjoint,
+        split_overlap_tasks=split_overlap_tasks or [],
+        train_tasks=[_display_task(task) for task in train_tasks],
+        heldout_tasks=[_display_task(task) for task in heldout_tasks],
         baseline_results={},
         candidate_results={},
         baseline_average_score=0.0,
@@ -455,6 +507,13 @@ def _task_id(task_dir: Path) -> str:
         return TaskMetadata.from_file(task_dir / "metadata.json").task_id
     except Exception:
         return task_dir.name
+
+
+def _task_identity(task_dir: Path) -> str:
+    try:
+        return f"task_id:{TaskMetadata.from_file(task_dir / 'metadata.json').task_id}"
+    except Exception:
+        return f"path:{str(task_dir.resolve()).casefold()}"
 
 
 def _safe_task_name(task_id: str) -> str:

@@ -1,4 +1,0 @@
-Task: known/graph_reachability_bfs
-Baseline behavior: copied the starter implementation that checks only a direct edge.
-Observed result: indirect paths and cycles are missed.
-Discovery lesson: the agent must explore a visited frontier with BFS or DFS.

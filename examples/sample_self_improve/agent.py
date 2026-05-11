@@ -65,6 +65,35 @@ def solve(n: int, edges: list[tuple[int, int]], source: int, target: int) -> boo
 '''
 
 
+def solve_dijkstra_source() -> str:
+    return '''from __future__ import annotations
+
+from heapq import heappop, heappush
+
+
+def solve(n: int, edges: list[tuple[int, int, int]], source: int, target: int) -> int:
+    graph: list[list[tuple[int, int]]] = [[] for _ in range(n)]
+    for u, v, weight in edges:
+        graph[u].append((v, weight))
+
+    dist = [float("inf")] * n
+    dist[source] = 0
+    heap: list[tuple[int, int]] = [(0, source)]
+    while heap:
+        cost, node = heappop(heap)
+        if node == target:
+            return cost
+        if cost != dist[node]:
+            continue
+        for nxt, weight in graph[node]:
+            new_cost = cost + weight
+            if new_cost < dist[nxt]:
+                dist[nxt] = new_cost
+                heappush(heap, (new_cost, nxt))
+    return -1
+'''
+
+
 TRACE_BY_TASK: dict[str, dict[str, Any]] = {
     "known/two_sum_hash": {
         "chosen_algorithm": "hash set complement lookup",
@@ -121,6 +150,24 @@ TRACE_BY_TASK: dict[str, dict[str, Any]] = {
         "edge_cases": ["source equals target", "cycle", "disconnected component", "long chain"],
         "counterexample_for_wrong_approach": "A path 0->1->2 reaches 2 without a direct edge 0->2."
     },
+    "known/dijkstra_positive_weights": {
+        "chosen_algorithm": "Dijkstra priority heap relaxation",
+        "hypotheses": [
+            "treat the graph like an unweighted BFS",
+            "relax positive weighted edges with a priority heap"
+        ],
+        "rejected_algorithms": [
+            {
+                "name": "BFS by hop count",
+                "reason": "A path with fewer hops can be more expensive when edge weights differ."
+            }
+        ],
+        "invariant": "When a node is popped with its current best cost, that settled cost is the shortest known path; every relaxation only improves a neighbor distance.",
+        "complexity_time": "O((n + m) log n)",
+        "complexity_space": "O(n + m)",
+        "edge_cases": ["unreachable target", "weighted detour beats one hop", "stale heap entries"],
+        "counterexample_for_wrong_approach": "Edges 0->1 cost 10 and 0->2->1 costs 2 make hop-count BFS wrong."
+    },
 }
 
 
@@ -128,6 +175,7 @@ SOURCE_BY_TASK = {
     "known/two_sum_hash": solve_two_sum_source,
     "known/valid_parentheses_stack": solve_parentheses_source,
     "known/graph_reachability_bfs": solve_graph_reachability_source,
+    "known/dijkstra_positive_weights": solve_dijkstra_source,
 }
 
 

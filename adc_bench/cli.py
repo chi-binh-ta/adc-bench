@@ -90,6 +90,11 @@ def main() -> None:
     self_improve_parser.add_argument("--task", type=Path, required=True)
     self_improve_parser.add_argument("--timeout", type=float, default=5.0)
     self_improve_parser.add_argument(
+        "--allow-overlap",
+        action="store_true",
+        help="Allow overlapping train and held-out tasks for legacy debugging",
+    )
+    self_improve_parser.add_argument(
         "--format",
         choices=["json", "text"],
         default="json",
@@ -161,6 +166,7 @@ def main() -> None:
             candidate_agent_dir=args.candidate_agent,
             self_improve_task_dir=args.task,
             timeout_seconds=args.timeout,
+            strict_split=not args.allow_overlap,
         )
 
         if args.format == "text":

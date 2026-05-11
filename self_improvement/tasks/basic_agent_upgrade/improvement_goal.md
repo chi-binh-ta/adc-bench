@@ -15,5 +15,7 @@ hard-code hidden behavior, inspect private task files, or modify evaluator files
 It should rely on visible task materials such as `problem.md`, `metadata.json`,
 and `starter.py`.
 
-For this v0.3.0 MVP, the held-out list intentionally contains small known tasks
-so the self-improvement evaluator can be tested deterministically.
+For this v0.3.1 MVP, the held-out list intentionally contains small known tasks
+so the self-improvement evaluator can be tested deterministically. In v0.3.1,
+training and held-out task lists must be disjoint: training failure logs are only
+provided for training tasks, while held-out tasks are used only for evaluation.
