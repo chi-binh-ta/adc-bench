@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 import shutil
@@ -50,7 +50,7 @@ def load_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8-sig"))
     except json.JSONDecodeError as exc:
         return {"__json_error__": str(exc)}
 
@@ -119,7 +119,7 @@ def run_test_file(
 
     try:
         proc = subprocess.run(
-            [sys.executable, str(local_test.name)],
+            [sys.executable, "-m", "pytest", "-q", str(local_test.name)],
             cwd=workdir,
             text=True,
             stdout=subprocess.PIPE,
