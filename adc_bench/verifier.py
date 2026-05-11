@@ -89,6 +89,88 @@ def words_from_text(text: str) -> list[str]:
     return [w for w in cleaned.split() if len(w) >= 3 and w not in stopwords]
 
 
+def complexity_signals(text: str) -> set[str]:
+    """Return coarse complexity classes mentioned in a free-form string."""
+    t = normalize_text(text)
+    compact = (
+        t.replace(" ", "")
+        .replace("\\", "")
+        .replace("*", "")
+        .replace("time", "")
+        .replace("complexity", "")
+        .replace(":", "")
+        .replace("=", "")
+    )
+
+    signals: set[str] = set()
+
+    if not t:
+        return signals
+
+    if "constant" in t or "o(1)" in compact:
+        signals.add("constant")
+
+    if "linear" in t or "o(n)" in compact or "theta(n)" in compact:
+        signals.add("linear")
+
+    if (
+        "graph linear" in t
+        or "o(v+e)" in compact
+        or "o(n+m)" in compact
+        or "vertices+edges" in compact
+        or "nodes+edges" in compact
+    ):
+        signals.add("graph_linear")
+
+    if "logarithmic" in t or "o(logn)" in compact:
+        signals.add("logarithmic")
+
+    if (
+        "n log n" in t
+        or "nlogn" in compact
+        or "o(nlogn)" in compact
+        or "o(nlog(n))" in compact
+    ):
+        signals.add("n_log_n")
+
+    if "quadratic" in t or "o(n^2)" in compact or "o(n2)" in compact:
+        signals.add("quadratic")
+
+    if "cubic" in t or "o(n^3)" in compact or "o(n3)" in compact:
+        signals.add("cubic")
+
+    if "exponential" in t or "2^n" in compact or "o(2^n)" in compact:
+        signals.add("exponential")
+
+    return signals
+
+
+def complexity_matches(actual: str, expected: str) -> bool:
+    """Heuristic equivalence check for complexity strings.
+
+    Examples considered equivalent:
+    - "O(n)", "O(n) time", "linear time"
+    - "O(V + E)", "graph linear time", "vertices + edges"
+    - "O(n log n)", "n log n time"
+    """
+    actual_norm = normalize_text(actual)
+    expected_norm = normalize_text(expected)
+
+    if not actual_norm or not expected_norm:
+        return False
+
+    actual_compact = actual_norm.replace(" ", "").replace("\\", "")
+    expected_compact = expected_norm.replace(" ", "").replace("\\", "")
+
+    if expected_compact and expected_compact in actual_compact:
+        return True
+
+    actual_signals = complexity_signals(actual_norm)
+    expected_signals = complexity_signals(expected_norm)
+
+    return bool(actual_signals & expected_signals)
+
+
 def scan_for_cheating(solution_path: Path) -> tuple[float, list[str]]:
     if not solution_path.exists():
         return 0.0, ["solution.py does not exist"]
@@ -215,7 +297,7 @@ def rough_trace_score(
         errors.append("invariant is missing")
 
     complexity_time = normalize_text(trace.get("complexity_time"))
-    if expected_complexity and expected_complexity in complexity_time:
+    if complexity_matches(complexity_time, expected_complexity):
         score += 0.15
     elif complexity_time:
         score += 0.05

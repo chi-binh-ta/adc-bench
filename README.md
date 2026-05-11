@@ -612,6 +612,59 @@ reports/summary.md
 
 ---
 
+
+
+---
+
+## Standalone Verifier
+
+ADC-bench also includes a standalone verifier module:
+
+```bash
+python -m adc_bench.verifier <task_dir> <submission_dir> [timeout_seconds]
+```
+
+Example:
+
+```bash
+python -m adc_bench.verifier tasks/known/two_sum_hash examples/sample_submissions/two_sum_hash 5
+```
+
+The verifier checks a single task submission and prints a JSON report.
+
+It evaluates:
+
+```text
+public tests
+hidden tests
+stress tests
+trace.json quality
+anti-cheat scan
+partial ADC score
+```
+
+A typical successful output looks like:
+
+```json
+{
+  "task_id": "known/two_sum_hash",
+  "passed_public": true,
+  "passed_hidden": true,
+  "passed_stress": true,
+  "correctness": 1.0,
+  "complexity": 1.0,
+  "trace_quality": 1.0,
+  "anti_cheat": 1.0,
+  "adc_score_partial": 0.75,
+  "errors": []
+}
+```
+
+The standalone verifier is useful for debugging one task before running the full benchmark.
+
+Note: `adc_score_partial` does not include full transfer and robustness scoring. Those are better computed at the evaluator or family level.
+
+
 ## 22. Result Format
 
 Each evaluated task produces a result like:
