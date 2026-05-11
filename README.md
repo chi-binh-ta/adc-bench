@@ -660,6 +660,27 @@ A typical successful output looks like:
 }
 ```
 
+
+
+You can also run the verifier through the main ADC-bench CLI:
+
+```bash
+python -m adc_bench.cli verify --task tasks/known/two_sum_hash --submission examples/sample_submissions/two_sum_hash --timeout 5
+```
+
+For a human-readable report:
+
+```bash
+python -m adc_bench.cli verify --task tasks/known/two_sum_hash --submission examples/sample_submissions/two_sum_hash --timeout 5 --format text
+```
+
+To write the verifier report to a file:
+
+```bash
+python -m adc_bench.cli verify --task tasks/known/two_sum_hash --submission examples/sample_submissions/two_sum_hash --timeout 5 --format text --out reports/two_sum_hash_verifier.txt
+```
+
+
 The standalone verifier is useful for debugging one task before running the full benchmark.
 
 Note: `adc_score_partial` does not include full transfer and robustness scoring. Those are better computed at the evaluator or family level.

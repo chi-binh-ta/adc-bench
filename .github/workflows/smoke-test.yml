@@ -49,7 +49,7 @@ jobs:
         working-directory: ${{ steps.project.outputs.dir }}
         shell: bash
         run: |
-          python -m adc_bench.verifier tasks/known/two_sum_hash examples/sample_submissions/two_sum_hash 5 | tee verifier_result.json
+          python -m adc_bench.cli verify --task tasks/known/two_sum_hash --submission examples/sample_submissions/two_sum_hash --timeout 5 --format json | tee verifier_result.json
           python - <<'PY'
           import json
           from pathlib import Path

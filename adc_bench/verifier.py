@@ -432,6 +432,44 @@ def verify_task(
     )
 
 
+
+def format_text_report(result: VerificationResult) -> str:
+    """Return a readable text report for one verification result."""
+    def mark(value: bool) -> str:
+        return "PASS" if value else "FAIL"
+
+    lines: list[str] = []
+    lines.append("ADC-bench Verification Report")
+    lines.append("=" * 34)
+    lines.append(f"Task: {result.task_id}")
+    lines.append(f"Task dir: {result.task_dir}")
+    lines.append(f"Submission dir: {result.submission_dir}")
+    lines.append("")
+    lines.append("Test results")
+    lines.append("-" * 12)
+    lines.append(f"public tests : {mark(result.passed_public)}")
+    lines.append(f"hidden tests : {mark(result.passed_hidden)}")
+    lines.append(f"stress tests : {mark(result.passed_stress)}")
+    lines.append("")
+    lines.append("Score components")
+    lines.append("-" * 16)
+    lines.append(f"correctness       : {result.correctness:.3f}")
+    lines.append(f"complexity        : {result.complexity:.3f}")
+    lines.append(f"trace_quality     : {result.trace_quality:.3f}")
+    lines.append(f"anti_cheat        : {result.anti_cheat:.3f}")
+    lines.append(f"adc_score_partial : {result.adc_score_partial:.3f}")
+    lines.append("")
+    lines.append("Errors / warnings")
+    lines.append("-" * 17)
+
+    if result.errors:
+        for item in result.errors:
+            lines.append(f"- {item}")
+    else:
+        lines.append("None")
+
+    return "\n".join(lines)
+
 def main() -> None:
     if len(sys.argv) not in {3, 4}:
         print(
