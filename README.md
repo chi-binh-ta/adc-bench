@@ -472,7 +472,7 @@ The current anti-cheat system is designed to catch obvious violations in a resea
 
 ## 18. Task Splits
 
-ADC-bench v0.2 contains four task splits:
+ADC-bench v0.3.0 contains four task splits:
 
 ```text
 tasks/
@@ -540,7 +540,7 @@ These tasks may include misleading hints, hidden complexity traps, or cases wher
 
 ## 19. Current Initial Task Set
 
-ADC-bench v0.2 includes 10 initial tasks:
+ADC-bench v0.3.0 includes 10 initial algorithm tasks:
 
 ```text
 known/two_sum_hash
@@ -684,6 +684,65 @@ python -m adc_bench.cli verify --task tasks/known/two_sum_hash --submission exam
 The standalone verifier is useful for debugging one task before running the full benchmark.
 
 Note: `adc_score_partial` does not include full transfer and robustness scoring. Those are better computed at the evaluator or family level.
+
+## Self-Improving Agent Layer
+
+ADC-bench v0.3.0 adds an offline self-improvement benchmark layer. It evaluates
+whether a candidate agent improves over a weak baseline agent on held-out
+algorithm discovery tasks.
+
+Input:
+
+```text
+baseline agent directory
+candidate agent directory
+self-improvement task directory
+training task list
+held-out task list
+failure logs
+improvement goal
+```
+
+Output:
+
+```text
+baseline_average_score
+candidate_average_score
+absolute_gain
+normalized_gain
+no_regression
+improvement_trace_quality
+anti_cheat
+reproducibility
+self_improve_score
+```
+
+The scoring formula is:
+
+```text
+SelfImproveScore =
+    0.50 * normalized_gain
+  + 0.20 * no_regression
+  + 0.15 * improvement_trace_quality
+  + 0.10 * anti_cheat
+  + 0.05 * reproducibility
+```
+
+Run the sample self-improvement evaluation:
+
+```bash
+python -m adc_bench.cli self-improve-eval \
+  --baseline-agent agents/agent_v0 \
+  --candidate-agent examples/sample_self_improve \
+  --task self_improvement/tasks/basic_agent_upgrade \
+  --timeout 5 \
+  --format text
+```
+
+This layer is offline and reproducible. It does not perform live recursive
+self-modification; it compares two fixed agent directories after the candidate
+has already been produced. The anti-cheat checks are lightweight and intended
+for local research, not as a secure sandbox.
 
 
 ## 22. Result Format
@@ -863,14 +922,14 @@ ADC-bench is currently a research prototype for studying algorithm discovery beh
 
 ## 29. Limitations
 
-ADC-bench v0.2 has several known limitations:
+ADC-bench v0.3.0 has several known limitations:
 
 1. The local sandbox is not secure against malicious code.
 2. Trace scoring is heuristic.
 3. Transfer scoring is currently approximate.
 4. The task set is small.
 5. Some tasks may still resemble known competitive-programming patterns.
-6. The benchmark does not yet fully evaluate self-modifying agents.
+6. The self-improvement layer is offline and does not run live recursive agent updates.
 7. The anti-cheat system catches obvious violations, not sophisticated attacks.
 
 ---
@@ -880,8 +939,8 @@ ADC-bench v0.2 has several known limitations:
 Planned improvements:
 
 ```text
-v0.2.1 — Better verifier module and cleaner reports
-v0.3   — Self-improving agent layer
+v0.3.0 — Offline self-improving agent layer
+v0.3.1 — Better improvement traces and richer held-out suites
 v0.4   — Stronger synthetic task generation
 v0.5   — Human-verified task subset
 v1.0   — Stable benchmark release
@@ -889,29 +948,34 @@ v1.0   — Stable benchmark release
 
 ---
 
-## 31. Future Direction: Self-Improving Agent Layer
+## 31. Current Direction: Self-Improving Agent Layer
 
-A future version of ADC-bench may include tasks where an agent receives:
+ADC-bench v0.3.0 includes tasks where an offline candidate agent is evaluated
+against a weak baseline. The candidate receives:
 
 ```text
 agent_v0 source code
 failure logs
-held-out benchmark tasks
+training task list
+held-out task list
+improvement goal
 ```
 
 The agent must produce:
 
 ```text
-agent_v1
+agent.py
+improvement_trace.json
 ```
 
 The evaluator then checks whether:
 
 ```text
-Score(agent_v1) > Score(agent_v0)
+Score(candidate_agent) > Score(agent_v0)
 ```
 
-on held-out tasks. This would move ADC-bench from algorithm discovery toward recursive algorithm improvement.
+on held-out tasks. This moves ADC-bench from algorithm discovery toward
+reproducible agent improvement while keeping v0.3.0 deterministic and offline.
 
 ---
 

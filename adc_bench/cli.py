@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .evaluator import discover_tasks, project_root, run_all, run_task
 from .schemas import TaskMetadata
+from .self_improve import evaluate_self_improvement, format_self_improve_text_report
 from .verifier import format_text_report, verify_task
 
 
@@ -22,7 +23,9 @@ def _display_path(path: Path) -> str:
 
 def _write_or_print(content: str, output_path: Path | None) -> None:
     if output_path is None:
-        print(content)
+        encoding = sys.stdout.encoding or "utf-8"
+        safe_content = content.encode(encoding, errors="replace").decode(encoding)
+        print(safe_content)
         return
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -78,6 +81,27 @@ def main() -> None:
         help="Optional path to write the verifier report",
     )
 
+    self_improve_parser = subparsers.add_parser(
+        "self-improve-eval",
+        help="Evaluate an offline candidate agent improvement against a baseline agent",
+    )
+    self_improve_parser.add_argument("--baseline-agent", type=Path, required=True)
+    self_improve_parser.add_argument("--candidate-agent", type=Path, required=True)
+    self_improve_parser.add_argument("--task", type=Path, required=True)
+    self_improve_parser.add_argument("--timeout", type=float, default=5.0)
+    self_improve_parser.add_argument(
+        "--format",
+        choices=["json", "text"],
+        default="json",
+        help="Output format for the self-improvement report",
+    )
+    self_improve_parser.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="Optional path to write the self-improvement report",
+    )
+
     args = parser.parse_args()
 
     if args.command == "list":
@@ -126,6 +150,21 @@ def main() -> None:
 
         if args.format == "text":
             content = format_text_report(result)
+        else:
+            content = json.dumps(result.to_dict(), indent=2, ensure_ascii=False)
+
+        _write_or_print(content, args.out)
+
+    elif args.command == "self-improve-eval":
+        result = evaluate_self_improvement(
+            baseline_agent_dir=args.baseline_agent,
+            candidate_agent_dir=args.candidate_agent,
+            self_improve_task_dir=args.task,
+            timeout_seconds=args.timeout,
+        )
+
+        if args.format == "text":
+            content = format_self_improve_text_report(result)
         else:
             content = json.dumps(result.to_dict(), indent=2, ensure_ascii=False)
 

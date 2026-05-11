@@ -1,0 +1,10 @@
+{
+  "keyword_buckets": {
+    "observed_failures": ["starter", "weak trace", "stress", "order", "direct edge"],
+    "strategy": ["metadata", "problem", "algorithm", "task id"],
+    "changes_made": ["hash set", "stack", "bfs", "trace"],
+    "generalization": ["held-out", "fallback", "known tasks", "task family"],
+    "anti_cheat": ["visible files", "no hidden", "no reference", "private files"],
+    "limitations": ["heuristic", "limited", "unknown", "not recursive"]
+  }
+}

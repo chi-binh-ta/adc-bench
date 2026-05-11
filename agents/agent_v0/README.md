@@ -18,3 +18,10 @@ Or for one task:
 python agents/agent_v0/agent.py --task tasks/known/two_sum_hash --submission submissions/two_sum_hash
 python -m adc_bench.cli run-task --task tasks/known/two_sum_hash --submission submissions/two_sum_hash
 ```
+
+For self-improvement evaluation, the same agent also supports the shared agent
+interface:
+
+```bash
+python agents/agent_v0/agent.py --task tasks/known/two_sum_hash --out submissions/two_sum_hash
+```

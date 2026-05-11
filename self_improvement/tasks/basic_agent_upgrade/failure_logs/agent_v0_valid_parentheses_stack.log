@@ -1,0 +1,4 @@
+Task: known/valid_parentheses_stack
+Baseline behavior: copied the count-based starter implementation.
+Observed result: order-sensitive hidden cases such as cross-nesting fail.
+Discovery lesson: matching counts are insufficient; the agent must track unmatched opening brackets with a stack.

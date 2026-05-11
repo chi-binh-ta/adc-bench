@@ -66,3 +66,21 @@ jobs:
 
           print("Verifier smoke test passed.")
           PY
+
+      - name: Evaluate sample self-improvement agent
+        working-directory: ${{ steps.project.outputs.dir }}
+        shell: bash
+        run: |
+          python -m adc_bench.cli self-improve-eval --baseline-agent agents/agent_v0 --candidate-agent examples/sample_self_improve --task self_improvement/tasks/basic_agent_upgrade --timeout 5 --format json | tee self_improve_result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("self_improve_result.json").read_text(encoding="utf-8-sig"))
+
+          assert result["candidate_average_score"] >= result["baseline_average_score"], result
+          assert result["self_improve_score"] > 0, result
+          assert result["anti_cheat"] == 1.0, result
+
+          print("Self-improvement smoke test passed.")
+          PY

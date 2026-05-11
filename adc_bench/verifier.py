@@ -488,7 +488,9 @@ def main() -> None:
         timeout_seconds=timeout_seconds,
     )
 
-    print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
+    content = json.dumps(result.to_dict(), indent=2, ensure_ascii=False)
+    encoding = sys.stdout.encoding or "utf-8"
+    print(content.encode(encoding, errors="replace").decode(encoding))
 
 
 if __name__ == "__main__":

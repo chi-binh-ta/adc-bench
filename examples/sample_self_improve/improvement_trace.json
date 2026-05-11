@@ -1,0 +1,35 @@
+{
+  "improvement_goal": "Improve over the starter-copying baseline on basic known tasks.",
+  "observed_failures": [
+    "agent_v0 keeps starter implementations and writes a weak trace",
+    "two_sum_hash needs a hash set because the starter fails stress behavior",
+    "valid_parentheses_stack needs order-sensitive stack logic",
+    "graph_reachability_bfs needs more than a direct edge check"
+  ],
+  "strategy": [
+    "Read visible problem and metadata files",
+    "Use the task id to select a small known algorithm template",
+    "Emit a task-specific trace that names the algorithm, invariant, complexity, and rejected approach"
+  ],
+  "changes_made": [
+    "Generate hash set complement lookup for two_sum_hash",
+    "Generate stack-based bracket matching for valid_parentheses_stack",
+    "Generate BFS frontier traversal for graph_reachability_bfs",
+    "Generate stronger trace files"
+  ],
+  "generalization": [
+    "The candidate applies simple known task patterns to held-out known tasks",
+    "Unknown tasks fall back to starter code with a transparent weak trace"
+  ],
+  "anti_cheat": [
+    "Use visible files only",
+    "No hidden task files are read",
+    "No reference implementation files are read",
+    "No private files are inspected"
+  ],
+  "limitations": [
+    "This is a deterministic heuristic sample, not recursive self-modification",
+    "The supported task set is limited",
+    "Unknown tasks still use a weak fallback"
+  ]
+}

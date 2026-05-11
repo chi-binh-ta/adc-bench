@@ -1,0 +1,4 @@
+Task: known/two_sum_hash
+Baseline behavior: copied the O(n^2) starter implementation.
+Observed result: public and hidden examples can pass, but stress tests time out.
+Discovery lesson: the agent must infer complement lookup with a hash set and explain the seen-values invariant.

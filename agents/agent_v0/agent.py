@@ -33,10 +33,14 @@ def generate_submission(task_dir: Path, submission_dir: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate weak ADC-bench baseline submission")
     parser.add_argument("--task", type=Path, required=True)
-    parser.add_argument("--submission", type=Path, required=True)
+    parser.add_argument("--submission", type=Path, default=None)
+    parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args()
-    generate_submission(args.task, args.submission)
-    print(f"Wrote weak baseline submission to {args.submission}")
+    output_dir = args.out or args.submission
+    if output_dir is None:
+        parser.error("one of --out or --submission is required")
+    generate_submission(args.task, output_dir)
+    print(f"Wrote weak baseline submission to {output_dir}")
 
 
 if __name__ == "__main__":
