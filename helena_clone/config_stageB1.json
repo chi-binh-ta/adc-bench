@@ -1,0 +1,70 @@
+{
+  "status": "RECONSTRUCTED_CLONE",
+  "dataset": {
+    "path": "tmpdata/helena.arff",
+    "n_total": 65196,
+    "n_features": 27,
+    "n_classes": 100,
+    "split_random_state": 42,
+    "test_size_stage1": 0.30,
+    "test_size_stage2": 0.50,
+    "cal_size_within_validation": 0.50
+  },
+  "representation": {
+    "m": 16384,
+    "mmax_nested_pool": 24576,
+    "gamma": 0.02423,
+    "landmark_method": "stratified_random_nested_prefix",
+    "feature_block": 1024,
+    "memmap_order": "C",
+    "column_normalize": true
+  },
+  "rsp": {
+    "rank": 256,
+    "lambda_spec": 0.001,
+    "sketch_rows": 1024,
+    "sketch_method": "stratified_random",
+    "sketch_random_state": "experiment_seed",
+    "randomized_svd_n_iter": 8,
+    "randomized_svd_random_state": 0
+  },
+  "training": {
+    "alpha_wce": 0.10,
+    "lambda_soft_f1": 1.0,
+    "eps": 0.02,
+    "wce_steps": 18,
+    "soft_f1_steps": 9,
+    "adaptive_steps": 6,
+    "optimizer": "barzilai_borwein_full_batch_reconstruction",
+    "bb_lr_init": 1.0,
+    "bb_lr_min": 0.0001,
+    "bb_lr_max": 5.0,
+    "adaptive_factor_clip": [0.5, 3.0]
+  },
+  "stageB1": {
+    "seed": 42,
+    "tau0": [0.694, 0.815, 0.935],
+    "rho": [0.0, 0.15, 0.30],
+    "lambda_shrink": [20.0, 50.0],
+    "reporting_rows": 18,
+    "unique_models": 15,
+    "scalar_control": "rho=0 at matched tau0",
+    "candidate_start_checkpoint": "same SoftMacroF1 checkpoint",
+    "eta_R": "0.05 + 0.15*tau_k",
+    "eta_P": "0.20 - 0.15*tau_k",
+    "tau_k": "clip(tau0 + rho*log((Ptilde_k+eps)/(Rtilde_k+eps)),0,1)"
+  },
+  "historical_seed42_m16384_tau0935": {
+    "mu1": 6517.5686478,
+    "mur": 0.01170029077,
+    "qmin": 0.001395931118,
+    "base_nll": 3.0589647293,
+    "g2_nll": 2.9153313637,
+    "accuracy": 0.3317996,
+    "macro_f1": 0.1451121,
+    "balanced_accuracy": 0.149154,
+    "tail20_f1": 0.0679774,
+    "g2_a0": -1.50616822,
+    "g2_a1": 1.34225192
+  }
+}
