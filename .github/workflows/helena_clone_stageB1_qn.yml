@@ -1,0 +1,38 @@
+name: Helena clone StageB1 QN v2
+on:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - '.github/workflows/helena_clone_stageB1_qn.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stageB1_qn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - run: pip install -q numpy pandas scipy scikit-learn
+      - name: Run Stage B1 numeric-split QN clone
+        run: cd helena_clone && python run_stageB1_qn.py
+      - name: Upload Stage B1 QN results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-clone-stageB1-qn-v2-seed42-m16384
+          path: |
+            helena_clone/outputs/**
+            helena_clone/RECONSTRUCTION_MANIFEST.md
+            helena_clone/HISTORICAL_LEDGER.md
+            helena_clone/CLONE_CHANGELOG.md
+            helena_clone/config_stageB1.json
+            helena_clone/qn_selected.json
+          retention-days: 30
