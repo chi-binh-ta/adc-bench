@@ -1,0 +1,32 @@
+name: Helena clone quick QN anchor
+on:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/optimizer_anchor_quick.py'
+      - '.github/workflows/helena_clone_anchor_quick.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - run: pip install -q numpy pandas scipy scikit-learn
+      - name: Run quick numeric QN anchor
+        run: cd helena_clone && python optimizer_anchor_quick.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-clone-quick-qn-anchor
+          path: helena_clone/outputs/**
+          retention-days: 30
