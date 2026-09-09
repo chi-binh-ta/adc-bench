@@ -1,6 +1,15 @@
 {
-  "status": "PENDING_ANCHOR",
-  "memory": 10,
-  "scale": 1.0,
-  "source": "Will be replaced by seed42 WCE meta-NLL anchor sweep before Stage B1 QN launch"
+  "status": "ANCHORED_WCE_SEED42_CLONE_V2",
+  "memory": 5,
+  "scale": 0.25,
+  "anchor": {
+    "seed": 42,
+    "m": 16384,
+    "steps": 18,
+    "measured_wce_meta_nll": 2.9415907859802246,
+    "historical_wce_meta_nll": 3.08469558,
+    "absolute_gap": 0.14310479401977538,
+    "selection_rule": "closest historical WCE meta-NLL among scanned fixed-step L-BFGS configurations"
+  },
+  "note": "Reconstruction clone; reproducibility and internal paired comparison take precedence over bit-identical recovery."
 }
