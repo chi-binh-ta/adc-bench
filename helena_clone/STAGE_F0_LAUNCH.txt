@@ -1,0 +1,2 @@
+Stage F0 latent residual low-dimensionality audit launch — 2026-09-09.
+Protocol frozen before spectrum/results. Canonical source run: 34375185211.
