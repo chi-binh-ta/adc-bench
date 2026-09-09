@@ -1,0 +1,40 @@
+name: Helena clone StageB2 seed123 confirmation
+on:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/run_stageB2_seed123.py'
+      - '.github/workflows/helena_clone_stageB2_seed123.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stageB2_seed123:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - run: pip install -q numpy pandas scipy scikit-learn
+      - name: Run Stage B2 seed123 confirmation
+        run: cd helena_clone && python run_stageB2_seed123.py
+      - name: Upload B2 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-clone-stageB2-seed123-m16384
+          path: |
+            helena_clone/outputs/**
+            helena_clone/RECONSTRUCTION_MANIFEST.md
+            helena_clone/HISTORICAL_LEDGER.md
+            helena_clone/CLONE_CHANGELOG.md
+            helena_clone/results/STAGE_B1_QN_V2_RESULT.md
+            helena_clone/config_stageB1.json
+            helena_clone/qn_selected.json
+          retention-days: 30
