@@ -124,3 +124,47 @@ Stage ledger after this run:
 - Stage B1: COMPLETED on seed42 / positive
 - Stage B2: NEXT — seed123 confirmation
 - Stage B3: pending final tau_k policy freeze.
+
+## 2026-09-09 — Stage B2 seed123 confirmation COMPLETED
+
+Frozen confirmation shortlist from B1:
+- primary: tau0=.694, rho=.15, lambda=50
+- macro: tau0=.815, rho=.15, lambda=20
+- high_tau: tau0=.935, rho=.15, lambda=20
+
+Seed123 reconstruction:
+- m=16,384
+- RSP fingerprint: mu1=6339.4588143, mur=.01023982013, qmin=.001331537962
+- WCE meta-NLL=3.0056447983
+- SoftF1 meta-NLL=2.8677737713
+- QN-v2 remained frozen; no re-anchoring or retuning was allowed on seed123.
+
+Paired confirmation outcomes versus matched scalar controls:
+- primary: dAcc=-.001022495, dMacro=-.000638232, dBal=-.000883039, dTail=0, dNLL=+.002159834 -> NOT CONFIRMED
+- macro: dAcc=-.001635992, dMacro=-.002127109, dBal=-.002257495, dTail=0, dNLL=+.004373312 -> NOT CONFIRMED
+- high_tau: dAcc=-.001022495, dMacro=-.000317495, dBal=-.000634662, dTail=0, dNLL=+.001865387 -> NOT CONFIRMED
+
+Result:
+- n_confirmed_relaxed = 0/3
+- n_confirmed_strict = 0/3
+- class-conditional tau_k gain observed on seed42 does not replicate on seed123.
+
+Two-seed scalar-control descriptive means favor tau=.694:
+- tau=.694: Acc=.352352, MacroF1=.192527, BalAcc=.192401, Tail20=.103344, NLL=2.832839, ECE=.060850
+- tau=.815: Acc=.350307, MacroF1=.192136, BalAcc=.191995, Tail20=.100364, NLL=2.840373, ECE=.061679
+- tau=.935: Acc=.348875, MacroF1=.192198, BalAcc=.191516, Tail20=.099823, NLL=2.848920, ECE=.062541
+
+Stage-B interpretation:
+- class-conditional tau_k is NOT CONFIRMED under the two-seed clone-v2 protocol;
+- the simpler scalar tau=.694 is the recommended B3 freeze candidate;
+- this is a Reconstruction Clone v2 decision, not a rewrite of the historical high-capacity tau=.935 runs.
+
+Persisted outputs:
+- `helena_clone/results/stageB2_seed123_6rows_cal.csv`
+- `helena_clone/results/STAGE_B2_SEED123_RESULT.md`
+
+Ledger after B2:
+- Stage A: CLOSED at m=16,384
+- Stage B1: COMPLETED / seed42 positive
+- Stage B2: COMPLETED / seed123 non-replication
+- Stage B3: NEXT — final scalar/tau_k policy freeze.
