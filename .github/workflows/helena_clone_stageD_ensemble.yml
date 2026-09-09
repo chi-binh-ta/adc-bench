@@ -1,0 +1,76 @@
+name: Helena clone StageD five-seed ensemble
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'helena_clone/STAGE_D_TRIGGER'
+
+jobs:
+  train_seed:
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        seed: [42, 123, 456, 789, 2026]
+    runs-on: ubuntu-latest
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+      STAGE_D_SEED: ${{ matrix.seed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Train frozen Stage-D seed
+        run: cd helena_clone && python run_stageD_seed.py
+      - name: Upload aligned logits and audit summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: stageD-seed-${{ matrix.seed }}
+          path: |
+            helena_clone/outputs/stageD_seed${{ matrix.seed }}_predictions.npz
+            helena_clone/outputs/stageD_seed${{ matrix.seed }}_summary.json
+            helena_clone/outputs/stageD_seed${{ matrix.seed }}_training.json
+            helena_clone/outputs/rsp_fingerprint_seed${{ matrix.seed }}_m16384.json
+          retention-days: 30
+
+  aggregate:
+    needs: train_seed
+    runs-on: ubuntu-latest
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Download all seed artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stageD-seed-*
+          path: helena_clone/stageD_artifacts
+          merge-multiple: true
+      - name: Aggregate CAL, freeze decision, then open TEST
+        run: cd helena_clone && python aggregate_stageD.py
+      - name: Upload Stage-D final results
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-clone-stageD-five-seed-final
+          path: |
+            helena_clone/outputs/stageD_ensemble_results.csv
+            helena_clone/outputs/stageD_cal_decision.json
+            helena_clone/outputs/stageD_final_summary.json
+            helena_clone/outputs/STAGE_D_FINAL.md
+            helena_clone/STAGE_D_PROTOCOL.md
+            helena_clone/results/STAGE_B_FINAL.md
+            helena_clone/results/STAGE_C1_FINAL.md
+          retention-days: 30
