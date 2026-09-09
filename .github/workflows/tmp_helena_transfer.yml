@@ -1,0 +1,33 @@
+name: Temporary Helena transfer
+
+on:
+  push:
+    branches:
+      - tmp-helena-transfer-20260909
+
+permissions:
+  contents: write
+
+jobs:
+  transfer:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: tmp-helena-transfer-20260909
+      - name: Download Helena from OpenML
+        run: |
+          mkdir -p tmpdata
+          curl -L --fail --retry 5 --retry-delay 2 \
+            'https://www.openml.org/data/download/19335692/file1c556677f875.arff' \
+            -o tmpdata/helena.arff
+          wc -c tmpdata/helena.arff
+          head -n 3 tmpdata/helena.arff
+      - name: Commit raw dataset to temporary branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tmpdata/helena.arff
+          git commit -m 'tmp: transfer Helena raw dataset [data]'
+          git push origin HEAD:tmp-helena-transfer-20260909
