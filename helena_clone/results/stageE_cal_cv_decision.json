@@ -1,0 +1,43 @@
+{
+  "status": "STAGE_E_CAL_CV_FROZEN",
+  "seeds": [42, 123, 456, 789, 2026],
+  "structural_input": "coherent_logit_S5",
+  "cluster_definition": "Head20/Mid60/Tail20 by frozen training prevalence",
+  "global_cv": {
+    "nll": 2.7433488368988037,
+    "brier": 0.7826299166960756,
+    "ece": 0.033661580136034396,
+    "accuracy": 0.35603271983640083,
+    "macro_f1": 0.192839567750495,
+    "balanced_accuracy": 0.1927968998385024,
+    "tail20_f1": 0.10589625579099263
+  },
+  "cluster_cv": {
+    "nll": 2.7279505729675293,
+    "brier": 0.7808937097397531,
+    "ece": 0.022739009208718203,
+    "accuracy": 0.35848670756646217,
+    "macro_f1": 0.1904478053347913,
+    "balanced_accuracy": 0.1899715368929888,
+    "tail20_f1": 0.10004913663077963
+  },
+  "delta_cluster_minus_global": {
+    "nll": -0.015398263931274414,
+    "brier": -0.0017362069563224836,
+    "ece": -0.010922570927316192,
+    "accuracy": 0.0024539877300613355,
+    "macro_f1": -0.0023917624157036854,
+    "balanced_accuracy": -0.0028253629455136098,
+    "tail20_f1": -0.0058471191602129935
+  },
+  "cluster_pass": false,
+  "winner": "global_g2",
+  "gate": {
+    "nll_lt_0": true,
+    "brier_le_0": true,
+    "accuracy_tol": -0.001,
+    "macro_f1_tol": -0.001
+  },
+  "test_policy": "decision frozen before full-CAL refit and TEST evaluation; test cannot change winner",
+  "provenance_note": "Stage-D test was already opened previously; Stage E does not use it for tuning."
+}
