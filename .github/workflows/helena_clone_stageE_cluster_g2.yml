@@ -1,0 +1,49 @@
+name: Helena clone StageE cluster-pair G2
+
+on:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/STAGE_E_LAUNCH.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  stageE:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Download frozen Stage-D seed logits
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stageD-seed-*
+          path: helena_clone/stageE_artifacts
+          merge-multiple: true
+          repository: chi-binh-ta/adc-bench
+          run-id: 34370649924
+          github-token: ${{ github.token }}
+      - name: Run Stage E cluster-pair G2
+        run: cd helena_clone && python run_stageE_cluster_g2.py --artifact-dir stageE_artifacts
+      - name: Upload Stage E results
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-clone-stageE-cluster-pair-g2
+          path: |
+            helena_clone/outputs/stageE_*.json
+            helena_clone/outputs/stageE_*.csv
+            helena_clone/STAGE_E_PROTOCOL.md
+            helena_clone/results/STAGE_D_FINAL.md
+          retention-days: 30
