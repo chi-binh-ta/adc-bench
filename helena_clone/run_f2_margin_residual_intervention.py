@@ -19,7 +19,8 @@ ALPHA_G2 = np.array([-0.9026209634632217, 0.765345197612019], dtype=np.float64)
 LAMBDAS = np.array([-0.30,-0.20,-0.15,-0.10,-0.05,-0.025,0.0,0.025,0.05,0.10,0.15,0.20,0.30], dtype=np.float64)
 ALPHAS = np.logspace(-3, 3, 13)
 OUTER_SEED = 20260910
-CLASS_SEED = 20260911
+# Must match the frozen F1.5 class-level CV split exactly.
+CLASS_SEED = 20260910
 BOOT_SEED = 20260912
 N_BOOT = 1000
 
