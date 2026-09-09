@@ -1,0 +1,42 @@
+name: Helena clone StageC1 seed42 confusion-aware margin
+on:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/run_stageC1_seed42.py'
+      - 'helena_clone/STAGE_C_PROTOCOL.md'
+      - '.github/workflows/helena_clone_stageC1_seed42.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stageC1_seed42:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Run Stage C1 seed42 pilot
+        run: cd helena_clone && python run_stageC1_seed42.py
+      - name: Upload Stage C1 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-clone-stageC1-seed42-m16384
+          path: |
+            helena_clone/outputs/**
+            helena_clone/STAGE_C_PROTOCOL.md
+            helena_clone/results/STAGE_B_FINAL.md
+            helena_clone/RECONSTRUCTION_MANIFEST.md
+            helena_clone/HISTORICAL_LEDGER.md
+            helena_clone/CLONE_CHANGELOG.md
+            helena_clone/qn_selected.json
+          retention-days: 30
