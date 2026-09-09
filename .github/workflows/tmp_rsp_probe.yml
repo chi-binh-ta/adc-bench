@@ -17,11 +17,11 @@ jobs:
         with:
           ref: tmp-helena-transfer-20260909
       - run: pip install -q numpy pandas scipy scikit-learn
-      - run: python tmpdata/probe_rsp_protocol.py
+      - run: python tmpdata/probe_rsp_protocol_v2.py
       - name: Commit probe
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tmpout/probe_rsp_protocol.json
-          git commit -m 'tmp: RSP spectral probe result' || exit 0
+          git add tmpout/probe_rsp_protocol_v2.json
+          git commit -m 'tmp: RSP spectral probe v2 result' || exit 0
           git push origin HEAD:tmp-helena-transfer-20260909
