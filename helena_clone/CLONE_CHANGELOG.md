@@ -70,3 +70,57 @@ Stage-B v2 selection discipline:
 - meta split: estimate per-class P/R and construct tau_k
 - calibration split: compare Stage-B candidate policies against matched rho=0 controls
 - test split: untouched during the Stage-B sweep.
+
+## 2026-09-09 — Stage B1 QN-v2 seed42 COMPLETED
+
+Experiment:
+- m = 16,384 (Stage A frozen)
+- seed = 42
+- 18 reporting rows / 15 unique models
+- QN clone v2: memory=5, scale=.25
+- meta used for P/R -> tau_k construction
+- calibration used for candidate screening
+- test untouched.
+
+Outcome:
+- 7/18 reporting rows satisfy the clone's ranking-metric Pareto screen versus matched rho=0 controls.
+- Full exact CSV is persisted at `helena_clone/results/stageB1_qn_seed42_18rows_cal.csv`.
+- Human-readable analysis is persisted at `helena_clone/results/STAGE_B1_QN_V2_RESULT.md`.
+
+Primary candidate for B2 / seed123 confirmation:
+- tau0 = .694
+- rho = .15
+- lambda_shrink = 50
+- mean tau_k = .734572 (range .589829 to .815332)
+- calibration Accuracy = .355010225
+- Macro-F1 = .198725237
+- BalancedAcc = .197006774
+- Tail20-F1 = .112448778
+- NLL = 2.820905924
+- Brier = .792438192
+- ECE = .060175407
+
+Paired versus scalar tau0=.694 control:
+- dAccuracy = +.000408998
+- dMacroF1 = +.001362809
+- dBalancedAcc = +.000485792
+- dTail20 = 0
+- dNLL = +.001411915 (worse)
+- dBrier = +.000300058 (worse)
+- dECE = -.000250419 (better)
+
+Interpretation:
+- class-conditional tau_k produces a real ranking-side Pareto gain on seed42 under the clone protocol;
+- likelihood/Brier degrade slightly, which is treated as a downstream calibration trade-off because Stage B optimizes ranking/class-balance and G2 is the later calibration layer;
+- rho=.30 at tau0=.694 or .815 is rejected for the seed123 handoff because Tail20-F1 falls materially.
+
+Secondary B2 robustness candidates:
+- (.815, .15, 20): largest paired Macro-F1 gain in the moderate-tau region;
+- (.935, .15, 20): high-tau robustness check with improved ECE but tau_k close to saturation.
+
+Stage ledger after this run:
+- Stage A: CLOSED at m=16,384
+- Stage B0: CLOSED / protocol frozen
+- Stage B1: COMPLETED on seed42 / positive
+- Stage B2: NEXT — seed123 confirmation
+- Stage B3: pending final tau_k policy freeze.
