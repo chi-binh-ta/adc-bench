@@ -1,0 +1,34 @@
+name: Helena clone optimizer anchor QN
+on:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/optimizer_anchor_qn.py'
+      - '.github/workflows/helena_clone_anchor_qn.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  anchor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Run QN anchor sweep
+        run: cd helena_clone && python optimizer_anchor_qn.py
+      - name: Upload anchor results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-clone-qn-anchor-seed42-m16384
+          path: helena_clone/outputs/**
+          retention-days: 30
