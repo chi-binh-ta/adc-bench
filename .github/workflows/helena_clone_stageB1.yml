@@ -1,10 +1,5 @@
 name: Helena reconstructed clone StageB1 seed42
 on:
-  push:
-    branches: [helena-reconstruction-clone-20260909]
-    paths:
-      - 'helena_clone/**'
-      - '.github/workflows/helena_clone_stageB1.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,5 +28,6 @@ jobs:
           path: |
             helena_clone/outputs/**
             helena_clone/RECONSTRUCTION_MANIFEST.md
+            helena_clone/HISTORICAL_LEDGER.md
             helena_clone/config_stageB1.json
           retention-days: 30
