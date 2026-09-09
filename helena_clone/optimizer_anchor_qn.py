@@ -2,6 +2,7 @@ import json, time
 import numpy as np
 from pathlib import Path
 import run_stageB1_clone as B
+from numeric_split import load_split_numeric
 
 TARGET_WCE_META_NLL = 3.08469558
 SCALES = [0.25, 0.5, 1.0, 1.5]
@@ -71,7 +72,7 @@ def run_cfg(Ftr,ytr,Fmeta,ymeta,V,qminus,cw,scale,mem):
 
 
 def main():
-    X,y,tr,meta,cal,te=B.load_split(); Xt,yt=X[tr],y[tr]
+    X,y,tr,meta,cal,te=load_split_numeric(B.ROOT,B.CFG['dataset']['path']); Xt,yt=X[tr],y[tr]
     li,C=B.build_landmarks(Xt,yt)
     paths,mean,std=B.build_feature_cache(X,(tr,meta,cal,te),C)
     sizes=dict(train=len(tr),meta=len(meta),cal=len(cal),test=len(te))
@@ -89,7 +90,7 @@ def main():
                     best=(th.copy(),bi.copy(),rec)
     results=sorted(results,key=lambda r:r['abs_error'])
     Path(B.OUT).mkdir(parents=True,exist_ok=True)
-    json.dump({'rsp':fp,'target_wce_meta_nll':TARGET_WCE_META_NLL,'results':results},open(B.OUT/'optimizer_anchor_results.json','w'),indent=2)
+    json.dump({'status':'NUMERIC_SPLIT_QN_ANCHOR','rsp':fp,'target_wce_meta_nll':TARGET_WCE_META_NLL,'results':results},open(B.OUT/'optimizer_anchor_results.json','w'),indent=2)
     json.dump(logs,open(B.OUT/'optimizer_anchor_steps.json','w'),indent=2)
     if best:
         th,bi,rec=best
