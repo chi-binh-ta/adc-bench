@@ -1,0 +1,2 @@
+Launch Stage E cluster-pair G2 from frozen Stage-D coherent S=5 logits.
+Created 2026-09-09.
