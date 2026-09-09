@@ -1,0 +1,20 @@
+name: StageB1 seed42 m16384 reproduction fingerprint
+on:
+  push:
+    branches: [tmp-stageB1-seed42-20260909]
+permissions:
+  contents: read
+jobs:
+  fingerprint:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: tmp-stageB1-seed42-20260909
+      - run: pip install -q numpy pandas scipy scikit-learn
+      - run: python tmpdata/stageB1_fingerprint_m16384.py
