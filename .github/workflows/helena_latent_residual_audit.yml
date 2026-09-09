@@ -1,0 +1,42 @@
+name: Helena latent residual low-rank audit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'helena_clone/run_latent_residual_audit.py'
+      - '.github/workflows/helena_latent_residual_audit.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Download canonical final seed logits
+        uses: actions/download-artifact@v4
+        with:
+          pattern: helena-final-seed-*
+          path: helena_clone/latent_artifacts
+          merge-multiple: true
+          repository: chi-binh-ta/adc-bench
+          run-id: 34375185211
+          github-token: ${{ github.token }}
+      - name: Run residual low-rank audit
+        run: cd helena_clone && python run_latent_residual_audit.py --artifact-dir latent_artifacts
+      - name: Upload latent audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-latent-residual-audit
+          path: |
+            helena_clone/outputs/LATENT_RESIDUAL_AUDIT.json
+            helena_clone/outputs/latent_residual_lowrank_audit.csv
+          retention-days: 30
