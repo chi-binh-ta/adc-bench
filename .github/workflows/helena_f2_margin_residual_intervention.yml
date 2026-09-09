@@ -1,0 +1,50 @@
+name: Helena F2 margin-residual intervention
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/F2_TRIGGER'
+
+jobs:
+  intervene:
+    runs-on: ubuntu-24.04
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Download canonical final seed logits
+        uses: actions/download-artifact@v4
+        with:
+          pattern: helena-final-seed-*
+          path: helena_clone/f2_artifacts
+          merge-multiple: true
+          repository: chi-binh-ta/adc-bench
+          run-id: 34375185211
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run F2 margin-residual intervention
+        run: cd helena_clone && python run_f2_margin_residual_intervention.py --artifact-dir f2_artifacts
+      - name: Upload F2 audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-f2-margin-residual-intervention
+          path: |
+            helena_clone/outputs/F2_MARGIN_RESIDUAL_INTERVENTION.json
+            helena_clone/outputs/f2_cal_decision.json
+            helena_clone/outputs/f2_oof_lambda_metrics.csv
+            helena_clone/outputs/f2_fold_diagnostics.csv
+            helena_clone/outputs/f2_full_direction.csv
+            helena_clone/outputs/f2_test_metrics.csv
+            helena_clone/outputs/f2_test_bootstrap.json
+            helena_clone/F2_MARGIN_RESIDUAL_PROTOCOL.md
+          retention-days: 30
+          if-no-files-found: warn
