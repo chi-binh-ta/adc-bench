@@ -1,0 +1,52 @@
+{
+  "status": "F2_POSITIVE",
+  "system": "canonical coherent S5 -> global G2",
+  "direction": "cross-fitted V1 unique-margin component, soft/hard consensus",
+  "gate": "a=exp(-top2_gap/median_fit_gap)",
+  "lambda_grid": [-0.3,-0.2,-0.15,-0.1,-0.05,-0.025,0.0,0.025,0.05,0.1,0.15,0.2,0.3],
+  "lambda_star": -0.05,
+  "oof_control": {
+    "nll": 2.740367889404297,
+    "brier": 0.7823226651716408,
+    "ece": 0.03316529376893199,
+    "accuracy": 0.35644171779141104,
+    "macro_f1": 0.19372446794037734,
+    "balanced_accuracy": 0.19378281475364914,
+    "weighted_f1": 0.329638403602984,
+    "macro_precision": 0.21791257384133508,
+    "macro_recall": 0.19378281475364914,
+    "tail20_f1": 0.10589625579099263
+  },
+  "oof_winner": {
+    "lambda": -0.05,
+    "nll": 2.741716146469116,
+    "brier": 0.7825546554981124,
+    "ece": 0.03377816342960106,
+    "accuracy": 0.3572597137014315,
+    "macro_f1": 0.19490055879898846,
+    "balanced_accuracy": 0.19412086409852683,
+    "weighted_f1": 0.33119392010047516,
+    "macro_precision": 0.21996836677372034,
+    "macro_recall": 0.19412086409852683,
+    "tail20_f1": 0.11264089516721096,
+    "delta_nll": 0.001348257064819336,
+    "delta_brier": 0.00023199032647158724,
+    "delta_ece": 0.0006128696606690701,
+    "delta_accuracy": 0.0008179959100204637,
+    "delta_macro_f1": 0.0011760908586111174,
+    "delta_balanced_accuracy": 0.0003380493448776889,
+    "delta_tail20_f1": 0.006744639376218331,
+    "passes_nonzero_gate": true
+  },
+  "gate_rule": {
+    "macro_f1_gt_0": true,
+    "balanced_accuracy_gt_0": true,
+    "tail20_f1_gt_0": true,
+    "accuracy_min_delta": -0.0005,
+    "nll_max_delta": 0.003,
+    "brier_max_delta": 0.0008
+  },
+  "n_nonzero_passing": 2,
+  "test_policy": "lambda frozen from cross-fitted CAL before F2 TEST audit; TEST cannot change decision",
+  "provenance_note": "Helena TEST was already opened by earlier stages; F2 TEST is an internal replication audit. Run 1 was invalidated because class-level CV used a different seed from frozen F1.5; run 2 changes only that compatibility seed and reproduces F1.5 full-CAL residual CV R2."
+}
