@@ -1,0 +1,45 @@
+name: Helena F1.5 conditional latent identification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/F1_5_TRIGGER'
+
+jobs:
+  identify:
+    runs-on: ubuntu-24.04
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Download canonical final seed logits
+        uses: actions/download-artifact@v4
+        with:
+          pattern: helena-final-seed-*
+          path: helena_clone/f1_5_artifacts
+          merge-multiple: true
+          repository: chi-binh-ta/adc-bench
+          run-id: 34375185211
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run F1.5 conditional latent identification
+        run: cd helena_clone && python run_f1_5_conditional_identification.py --artifact-dir f1_5_artifacts
+      - name: Upload F1.5 audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-f1-5-conditional-identification
+          path: |
+            helena_clone/outputs/F1_5_CONDITIONAL_IDENTIFICATION.json
+            helena_clone/outputs/f1_5_conditional_tests.csv
+            helena_clone/outputs/f1_5_mechanistic_status.csv
+            helena_clone/outputs/f1_5_all_other_unique_summary.csv
+            helena_clone/F1_5_CONDITIONAL_PROTOCOL.md
+          retention-days: 30
