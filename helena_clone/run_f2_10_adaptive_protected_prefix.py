@@ -19,7 +19,6 @@ OUTER_SEED=20260910
 INNER_SEED=20261001
 BOOT_SEED=20261002
 N_BOOT=1000
-EPS=1e-12
 CUM_MS=[2,3,5]
 HAZ_RS=[2,3,4,5]
 
@@ -73,7 +72,6 @@ def make_features(p,dose,q):
 
 
 def targets_from_order(y,order):
-    rank=np.empty(len(y),dtype=int)
     inv=np.empty_like(order)
     rr=np.arange(1,order.shape[1]+1,dtype=order.dtype)
     inv[np.arange(len(order))[:,None],order]=rr[None,:]
@@ -161,9 +159,9 @@ def main():
     for fold,(fi,vi) in enumerate(outer.split(np.zeros(len(cal)),ycal),1):
         fi=np.asarray(fi); vi=np.asarray(vi)
         ptri,atri,qtri=inner_oof_c3(X,y,tr,cal,zcal,zsc,support,rawgeo,fi)
-        Xtri,otri=make_features(ptri,atri,qtri); rtri,ctri,htri=targets_from_order(ycal[fi],otri)
+        Xtri,otri=make_features(ptri,atri,qtri); _,ctri,htri=targets_from_order(ycal[fi],otri)
         pv,av,qv,diag=F28.fit_apply_c3(X,y,tr,cal,zcal,zsc,support,rawgeo,fi,vi)
-        Xv,ov=make_features(pv,av,qv); rv,cv,hv=targets_from_order(ycal[vi],ov)
+        Xv,ov=make_features(pv,av,qv); _,cv,hv=targets_from_order(ycal[vi],ov)
         oof_X[vi]=Xv.to_numpy(); oof_order[vi]=ov
         for m in CUM_MS:
             cum_pred[m][vi]=fit_predict_logit(Xtri,ctri[m],Xv)
@@ -206,10 +204,7 @@ def main():
     with open(out/'f2_10_cal_decision.json','w') as f: json.dump(decision,f,indent=2)
     print('F2_10_CAL_DECISION',json.dumps(decision),flush=True)
 
-    # Full-CAL C3 and TEST features after CAL decision freeze.
-    allpos=np.arange(len(cal)); ptest,atest,qtest,diag=F28.fit_apply_c3(X,y,tr,cal,zcal,zsc,support,rawgeo,allpos,np.arange(len(te)))
-    # fit_apply_c3 indexes zcal eval positions, so build full-CAL -> TEST explicitly using F2/F2.5 lineage.
-    # Recompute here with full CAL fit and ztest evaluation.
+    # Full-CAL C3 -> TEST after the OOF-CAL status has been frozen.
     import run_f2_5_post_intervention_calibration as F25
     pcal_pre=F2.global_probs(zcal)
     dfull,ds,dh,ddiag=F2.derive_direction(X,y,tr,cal,zcal,zsc,pcal_pre,K,support,rawgeo)
@@ -218,11 +213,10 @@ def main():
     a2,_=F25.fit_theta(zcal_i,Tcal,ycal,F25.CANON_ALPHA); qcal,qtest,qmu,qsd=F25.standardize_gate(acal,atest)
     a3,_=F25.fit_theta(zcal_i,F25.dose_bases(Tcal,qcal),ycal,np.array([a2[0],a2[1],0.,0.]))
     ptest=F25.apply_bases(ztest_i,F25.dose_bases(Ttest,qtest),a3)
-    Xtest,otest=make_features(ptest,atest,qtest); rtest,ctest,htest=targets_from_order(ytest,otest)
+    Xtest,otest=make_features(ptest,atest,qtest); _,ctest,htest=targets_from_order(ytest,otest)
     Xoof=pd.DataFrame(oof_X,columns=FEATURES)
 
-    test_cum={}; test_cum_pass={}; test_haz={}
-    pred_test_cum={}
+    test_cum={}; test_cum_pass={}; test_haz={}; pred_test_cum={}
     for m in CUM_MS:
         pred=fit_predict_logit(Xoof,cum_true[m],Xtest); pred_test_cum[m]=pred
         b=np.full(len(ytest),float(cum_true[m].mean()))
