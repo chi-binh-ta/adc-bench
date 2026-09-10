@@ -22,6 +22,10 @@ TOL=1e-12
 def rsd(p,a,eta):
     p=np.asarray(p,dtype=np.float64)
     a=np.asarray(a,dtype=np.float64)
+    # eta=0 is the frozen identity control. Return it bitwise instead of
+    # renormalizing the residual simplex and creating floating-point tie noise.
+    if float(eta)==0.0:
+        return p.copy()
     n,K=p.shape
     h=np.argmax(p,axis=1)
     top=p[np.arange(n),h].copy()
@@ -169,7 +173,6 @@ def main():
     with open(out/'f2_7_cal_decision.json','w') as f: json.dump(decision,f,indent=2)
     print('F2_7_CAL_DECISION',json.dumps(decision),flush=True)
 
-    # Full-CAL C3 rebuild after OOF decision freeze.
     pcal_pre=F2.global_probs(zcal)
     dfull,ds,dh,ddiag=F2.derive_direction(X,y,tr,cal,zcal,zsc,pcal_pre,K,support,rawgeo)
     scale=F2.gate_scale(zcal)
