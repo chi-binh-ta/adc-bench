@@ -1,0 +1,49 @@
+name: Helena F2.6 proper-score geometry
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/F2_6_TRIGGER'
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Download canonical final seed logits
+        uses: actions/download-artifact@v4
+        with:
+          pattern: helena-final-seed-*
+          path: helena_clone/f2_6_artifacts
+          merge-multiple: true
+          repository: chi-binh-ta/adc-bench
+          run-id: 34375185211
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run F2.6 proper-score geometry audit
+        run: cd helena_clone && python run_f2_6_proper_score_geometry.py --artifact-dir f2_6_artifacts
+      - name: Upload F2.6 audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-f2-6-proper-score-geometry
+          path: |
+            helena_clone/outputs/F2_6_PROPER_SCORE_GEOMETRY.json
+            helena_clone/outputs/f2_6_summary.json
+            helena_clone/outputs/f2_6_global_geometry.csv
+            helena_clone/outputs/f2_6_stratified_geometry.csv
+            helena_clone/outputs/f2_6_cal_sample_geometry.csv
+            helena_clone/outputs/f2_6_test_sample_geometry.csv
+            helena_clone/F2_6_PROPER_SCORE_GEOMETRY_PROTOCOL.md
+          retention-days: 30
+          if-no-files-found: warn
