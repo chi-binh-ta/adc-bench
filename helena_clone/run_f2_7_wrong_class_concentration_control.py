@@ -17,13 +17,12 @@ OUTER_SEED=20260910
 BOOT_SEED=20260927
 N_BOOT=1000
 TOL=1e-12
+RANK_TOL=64*np.finfo(np.float64).eps
 
 
 def rsd(p,a,eta):
     p=np.asarray(p,dtype=np.float64)
     a=np.asarray(a,dtype=np.float64)
-    # eta=0 is the frozen identity control. Return it bitwise instead of
-    # renormalizing the residual simplex and creating floating-point tie noise.
     if float(eta)==0.0:
         return p.copy()
     n,K=p.shape
@@ -50,9 +49,14 @@ def rsd(p,a,eta):
 
 
 def ranking_equal(p0,p1):
-    r0=np.argsort(-p0,axis=1,kind='stable')
-    r1=np.argsort(-p1,axis=1,kind='stable')
-    return bool(np.array_equal(r0,r1))
+    if not np.array_equal(np.argmax(p0,axis=1),np.argmax(p1,axis=1)):
+        return False
+    order=np.argsort(-p0,axis=1,kind='stable')
+    v=np.take_along_axis(p1,order,axis=1)
+    # In the reference weak order, a positive adjacent difference means a
+    # reversal. Allow only machine-scale tie noise; strict reversals fail.
+    max_reversal=float(np.max(v[:,1:]-v[:,:-1]))
+    return bool(max_reversal<=RANK_TOL)
 
 
 def geometry(y,p):
@@ -146,7 +150,7 @@ def main():
     for eta in ETA_GRID:
         p=rsd(probs['C3'],doses,float(eta)); peta[float(eta)]=p
         if not ranking_equal(probs['C3'],p):
-            raise RuntimeError(f'Ranking changed at eta={eta}')
+            raise RuntimeError(f'Weak ranking changed at eta={eta}')
         mm=summarize(ycal,p,support)
         rows.append({'eta':float(eta),**mm,
                      'delta_nll_vs_c3':mm['nll']-base['C3']['nll'],
@@ -169,6 +173,7 @@ def main():
         eta_star=0.0; win=next(r for r in rows if r['eta']==0.0); status='NO_CONTROL'
     decision={'status':status,'eta_star':eta_star,'eta_grid':ETA_GRID.tolist(),'c0':base['C0'],'c1':base['C1'],'c3':base['C3'],
               'winner':win,'n_eligible':len(candidates),'c3_replay_gap':gaps,
+              'rank_tolerance':float(RANK_TOL),
               'test_policy':'eta/status frozen from OOF-CAL before TEST; TEST cannot change closure'}
     with open(out/'f2_7_cal_decision.json','w') as f: json.dump(decision,f,indent=2)
     print('F2_7_CAL_DECISION',json.dumps(decision),flush=True)
@@ -184,7 +189,7 @@ def main():
     a3,opt3=F25.fit_theta(zcal_i,F25.dose_bases(Tcal,qcal),ycal,np.array([a2[0],a2[1],0.0,0.0]))
     pc3=F25.apply_bases(ztest_i,F25.dose_bases(Ttest,qtest),a3)
     ptest={'C0':F2.global_probs(ztest),'C1':F2.global_probs(ztest_i),'C3':pc3,'F2_7':rsd(pc3,atest,eta_star)}
-    if not ranking_equal(pc3,ptest['F2_7']): raise RuntimeError('TEST ranking changed')
+    if not ranking_equal(pc3,ptest['F2_7']): raise RuntimeError('TEST weak ranking changed')
     tmetrics={k:summarize(ytest,p,support) for k,p in ptest.items()}
     pd.DataFrame([{'model':k,**v} for k,v in tmetrics.items()]).to_csv(out/'f2_7_test_metrics.csv',index=False)
 
