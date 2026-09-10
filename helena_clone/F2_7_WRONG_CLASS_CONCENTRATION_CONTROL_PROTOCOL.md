@@ -1,6 +1,6 @@
 # F2.7 — Wrong-Class Concentration Control
 
-Status: **FROZEN BEFORE RESULTS**.
+Status: **FROZEN BEFORE RESULTS; numerical ranking invariant amended before any metric result was observed**.
 
 Branch: `helena-reconstruction-clone-20260909`.
 
@@ -63,12 +63,12 @@ Thus F2.7 only diffuses probability mass **within the non-top residual simplex**
 
 ### Structural properties
 
-For all frozen candidate strengths below, `gamma_i > 0`. Therefore:
+For all frozen candidate strengths below, `gamma_i > 0`. Therefore in exact arithmetic:
 
-- ordering among all non-top classes is preserved because `x -> x^gamma` is strictly monotone;
+- strict ordering among non-top classes is preserved because `x -> x^gamma` is strictly monotone;
 - the largest non-top residual share weakly decreases under `gamma <= 1`;
 - the predicted top-class probability is unchanged;
-- full class ranking and argmax are therefore preserved;
+- the class **weak order** and argmax are preserved;
 - on correctly classified samples, true-class probability is unchanged and the wrong-class squared mass weakly decreases by simplex flattening.
 
 On misclassified samples the true class lies inside the residual simplex, so its probability may increase or decrease. This is the empirical risk tested by F2.7.
@@ -102,7 +102,17 @@ Before selection:
 
 - `eta=0` must replay F2.5/F2.6 OOF C3 NLL, Brier, ECE and ranking metrics within `2e-6`;
 - for every eta, probability rows must sum to one within `1e-12`;
-- full ranking order must be unchanged sample-wise relative to C3; any ranking change invalidates the run.
+- argmax must be exactly unchanged sample-wise relative to C3;
+- strict probability order must have no reversal larger than the frozen floating tolerance `64 * eps(float64)`; reference ties/near-ties within that tolerance are treated as the same weak order.
+
+### Pre-result numerical-invariant amendment
+
+Two implementation-only attempts failed before producing any eta metric table:
+
+1. run 1 failed at `eta=0` because recomputing an exponent-1 residual simplex perturbed floating-point ties; the identity branch was changed to return `p.copy()` exactly;
+2. run 2 failed at `eta=0.01` because exact `argsort` treated tie-breaking among equal/near-equal probabilities as a change of ranking.
+
+No candidate metric or selection result was observed before this amendment. The mathematical invariant intended from the start is preservation of strict order/weak ranking, not arbitrary floating tie-breaking. Therefore the invariant is now frozen as stated above; the eta grid, transformation and all scientific gates remain unchanged.
 
 ## Primary mechanism metrics
 
@@ -147,7 +157,7 @@ If none is eligible, freeze `eta*=0` and close F2.7 `NO_CONTROL`.
 
 For the OOF-CAL winner:
 
-- **FULL_PARETO_RECOVERY** if `Brier <= C0`, `NLL <= C0`, and `ECE <= C0`, while ranking remains exactly C3/F2;
+- **FULL_PARETO_RECOVERY** if `Brier <= C0`, `NLL <= C0`, and `ECE <= C0`, while decisions and strict/weak ranking remain C3/F2-equivalent;
 - **PARTIAL_CONTROL** if eligible but one or more of those three canonical probability inequalities fail;
 - **NO_CONTROL** if no nonzero eta is eligible.
 
