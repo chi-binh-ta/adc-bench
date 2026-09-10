@@ -1,0 +1,74 @@
+name: MIMIC-IV demo phenotyping smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - mimic-iv-phenotyping-transfer-20260910
+    paths:
+      - 'mimic_transfer/**'
+      - '.github/workflows/mimic_iv_demo_phenotyping_smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      OPENBLAS_NUM_THREADS: '2'
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+      NUMEXPR_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: mimic-iv-phenotyping-transfer-20260910
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install stack
+        run: pip install -q numpy pandas scikit-learn pyyaml
+
+      - name: Download public MIMIC-IV demo v2.2
+        run: |
+          mkdir -p mimic_transfer/data
+          cd mimic_transfer/data
+          wget -q --show-progress https://physionet.org/static/published-projects/mimic-iv-demo/mimic-iv-clinical-database-demo-2.2.zip -O mimic-demo.zip
+          unzip -q mimic-demo.zip
+          find . -maxdepth 2 -type d -print
+
+      - name: Download frozen HCUP phenotype definitions
+        run: |
+          wget -q https://raw.githubusercontent.com/vincenzorusso3/mimic-iv-benchmarks/251b2336c4e74b671b4891878bbd09269d68d158/mimic4benchmark/resources/hcup_ccs_2015_definitions.yaml \
+            -O mimic_transfer/hcup_ccs_2015_definitions.yaml
+          grep -c 'use_in_benchmark: True' mimic_transfer/hcup_ccs_2015_definitions.yaml
+
+      - name: Run 48h multi-label phenotyping smoke
+        run: |
+          ROOT=$(find mimic_transfer/data -maxdepth 1 -type d -name 'mimic-iv-clinical-database-demo-*' | head -1)
+          test -n "$ROOT"
+          python mimic_transfer/run_mimic_demo_phenotyping_smoke.py \
+            --mimic-root "$ROOT" \
+            --defs mimic_transfer/hcup_ccs_2015_definitions.yaml \
+            --out mimic_transfer/outputs
+
+      - name: Show result summaries
+        if: always()
+        run: |
+          cat mimic_transfer/outputs/MIMIC_DEMO_PHENOTYPING_SMOKE.json || true
+          echo '--- organ targets ---'
+          cat mimic_transfer/outputs/mimic_demo_organ_failure_metrics.csv || true
+          echo '--- support ---'
+          cat mimic_transfer/outputs/mimic_demo_label_support.csv || true
+
+      - name: Upload smoke artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mimic-iv-demo-phenotyping-smoke
+          path: |
+            mimic_transfer/MIMIC_IV_PHENOTYPING_TRANSFER_PROTOCOL.md
+            mimic_transfer/hcup_ccs_2015_definitions.yaml
+            mimic_transfer/outputs/**
+          retention-days: 30
