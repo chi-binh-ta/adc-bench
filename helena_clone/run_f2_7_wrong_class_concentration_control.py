@@ -53,8 +53,6 @@ def ranking_equal(p0,p1):
         return False
     order=np.argsort(-p0,axis=1,kind='stable')
     v=np.take_along_axis(p1,order,axis=1)
-    # In the reference weak order, a positive adjacent difference means a
-    # reversal. Allow only machine-scale tie noise; strict reversals fail.
     max_reversal=float(np.max(v[:,1:]-v[:,:-1]))
     return bool(max_reversal<=RANK_TOL)
 
@@ -68,9 +66,14 @@ def geometry(y,p):
     ent=np.empty(len(y),dtype=np.float64)
     for i in range(len(y)):
         mask=np.ones(p.shape[1],dtype=bool); mask[top[i]]=False
-        mass=1.0-p[i,top[i]]
-        r=p[i,mask]/max(mass,1e-300)
-        ent[i]=-np.sum(r*np.log(np.maximum(r,1e-300)))
+        # Directly sum representable non-top mass; do not use 1-p_top,
+        # which can catastrophically cancel when p_top rounds to 1.
+        rmass=float(np.sum(p[i,mask],dtype=np.float64))
+        if rmass<=1e-300:
+            ent[i]=0.0
+        else:
+            r=p[i,mask]/rmass
+            ent[i]=-np.sum(r*np.log(np.maximum(r,1e-300)))
     return {'py':py,'true_sq':true_sq,'wrong_sq':wrong_sq,'residual_entropy':ent}
 
 
@@ -98,6 +101,49 @@ def paired_ci(x1,x0,rng,Bn=N_BOOT):
     for b in range(Bn):
         ix=rng.integers(0,n,n); vals[b]=d[ix].mean()
     return [float(np.quantile(vals,.025)),float(np.quantile(vals,.975))]
+
+
+def true_ranks(p,y):
+    order=np.argsort(-p,axis=1,kind='stable')
+    inv=np.empty_like(order)
+    rr=np.arange(1,p.shape[1]+1,dtype=order.dtype)
+    inv[np.arange(len(p))[:,None],order]=rr[None,:]
+    return inv[np.arange(len(p)),y]
+
+
+def posthoc_rank_rows(y,p3,peta):
+    tr=true_ranks(p3,y)
+    groups={
+        'rank1':tr==1,
+        'rank2':tr==2,
+        'rank3_5':(tr>=3)&(tr<=5),
+        'rank6_plus':tr>=6,
+    }
+    g3=geometry(y,p3)
+    nll3=-np.log(np.maximum(g3['py'],1e-15)); b3=g3['true_sq']+g3['wrong_sq']
+    rows=[]
+    for eta,p in peta.items():
+        if eta==0.0: continue
+        ge=geometry(y,p)
+        nlle=-np.log(np.maximum(ge['py'],1e-15)); be=ge['true_sq']+ge['wrong_sq']
+        for name,mask in groups.items():
+            n=int(mask.sum())
+            if n==0: continue
+            rows.append({
+                'eta':float(eta),'true_rank_group':name,'n':n,'share':float(mask.mean()),
+                'mean_delta_nll':float(np.mean(nlle[mask]-nll3[mask])),
+                'mean_delta_brier':float(np.mean(be[mask]-b3[mask])),
+                'mean_delta_py':float(np.mean(ge['py'][mask]-g3['py'][mask])),
+                'mean_delta_true_sq':float(np.mean(ge['true_sq'][mask]-g3['true_sq'][mask])),
+                'mean_delta_wrong_sq':float(np.mean(ge['wrong_sq'][mask]-g3['wrong_sq'][mask])),
+            })
+    return pd.DataFrame(rows),{
+        'rank1_share':float(np.mean(tr==1)),
+        'rank2_share':float(np.mean(tr==2)),
+        'rank3_5_share':float(np.mean((tr>=3)&(tr<=5))),
+        'rank6_plus_share':float(np.mean(tr>=6)),
+        'misclassified_true_is_rank2_fraction':float(np.mean(tr[tr>1]==2)) if np.any(tr>1) else 0.0,
+    }
 
 
 def build_oof(X,y,tr,cal,zcal,zsc,support,rawgeo):
@@ -161,6 +207,10 @@ def main():
                      'delta_entropy_vs_c3':mm['mean_residual_entropy']-base['C3']['mean_residual_entropy'],
                      'eligible': False if eta==0 else eligible(mm,base['C0'],base['C1'],base['C3'])})
     tab=pd.DataFrame(rows); tab.to_csv(out/'f2_7_oof_eta_metrics.csv',index=False)
+    rank_df,rank_summary=posthoc_rank_rows(ycal,probs['C3'],peta)
+    rank_df.to_csv(out/'f2_7_rank_strata_diagnostics.csv',index=False)
+    with open(out/'f2_7_rank_summary.json','w') as f: json.dump(rank_summary,f,indent=2)
+
     candidates=[r for r in rows if r['eligible']]
     if candidates:
         win=sorted(candidates,key=lambda r:(r['brier'],r['nll'],r['ece'],r['eta']))[0]
@@ -173,7 +223,7 @@ def main():
         eta_star=0.0; win=next(r for r in rows if r['eta']==0.0); status='NO_CONTROL'
     decision={'status':status,'eta_star':eta_star,'eta_grid':ETA_GRID.tolist(),'c0':base['C0'],'c1':base['C1'],'c3':base['C3'],
               'winner':win,'n_eligible':len(candidates),'c3_replay_gap':gaps,
-              'rank_tolerance':float(RANK_TOL),
+              'rank_tolerance':float(RANK_TOL),'posthoc_rank_summary':rank_summary,
               'test_policy':'eta/status frozen from OOF-CAL before TEST; TEST cannot change closure'}
     with open(out/'f2_7_cal_decision.json','w') as f: json.dump(decision,f,indent=2)
     print('F2_7_CAL_DECISION',json.dumps(decision),flush=True)
@@ -205,6 +255,7 @@ def main():
     with open(out/'f2_7_test_bootstrap.json','w') as f: json.dump(boot,f,indent=2)
     final={'status':status,'eta_star':eta_star,'oof_decision':decision,'test':tmetrics,'bootstrap':boot,
            'fullcal_c3_coefficients':a3.tolist(),'full_direction_diag':ddiag,
+           'diagnostic_repair':'entropy denominator repaired after run-3 selection; no scientific gate changed',
            'interpretation':'Mechanism-targeted residual-simplex diffusion; TEST cannot change OOF closure.'}
     with open(out/'F2_7_WRONG_CLASS_CONCENTRATION_CONTROL.json','w') as f: json.dump(final,f,indent=2)
     print('F2_7_TEST_OPENED_AFTER_CAL_FREEZE',flush=True)
