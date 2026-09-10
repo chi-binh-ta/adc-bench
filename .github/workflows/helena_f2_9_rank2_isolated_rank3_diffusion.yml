@@ -1,0 +1,52 @@
+name: Helena F2.9 rank-2 isolated rank-3+ diffusion
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [helena-reconstruction-clone-20260909]
+    paths:
+      - 'helena_clone/F2_9_TRIGGER'
+
+jobs:
+  control:
+    runs-on: ubuntu-24.04
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      MKL_NUM_THREADS: 2
+      NUMEXPR_NUM_THREADS: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: helena-reconstruction-clone-20260909
+      - name: Install scientific stack
+        run: pip install -q numpy pandas scipy scikit-learn
+      - name: Download canonical final seed logits
+        uses: actions/download-artifact@v4
+        with:
+          pattern: helena-final-seed-*
+          path: helena_clone/f2_9_artifacts
+          merge-multiple: true
+          repository: chi-binh-ta/adc-bench
+          run-id: 34375185211
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run F2.9 rank-2 isolated rank-3+ diffusion
+        run: cd helena_clone && python run_f2_9_rank2_isolated_rank3_diffusion.py --artifact-dir f2_9_artifacts
+      - name: Upload F2.9 audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: helena-f2-9-rank2-isolated-rank3-diffusion
+          path: |
+            helena_clone/outputs/F2_9_RANK2_ISOLATED_RANK3_DIFFUSION.json
+            helena_clone/outputs/f2_9_cal_decision.json
+            helena_clone/outputs/f2_9_oof_eta_metrics.csv
+            helena_clone/outputs/f2_9_invariants.csv
+            helena_clone/outputs/f2_9_fold_diagnostics.csv
+            helena_clone/outputs/f2_9_c3_cv_coefficients.csv
+            helena_clone/outputs/f2_9_rank_strata_diagnostics.csv
+            helena_clone/outputs/f2_9_test_metrics.csv
+            helena_clone/outputs/f2_9_test_bootstrap.json
+            helena_clone/F2_9_RANK2_ISOLATED_RANK3_DIFFUSION_PROTOCOL.md
+          retention-days: 30
+          if-no-files-found: warn
