@@ -45,6 +45,9 @@ jobs:
             helena_clone/outputs/f2_7_c3_cv_coefficients.csv
             helena_clone/outputs/f2_7_test_metrics.csv
             helena_clone/outputs/f2_7_test_bootstrap.json
+            helena_clone/outputs/f2_7_rank_strata_diagnostics.csv
+            helena_clone/outputs/f2_7_rank_summary.json
             helena_clone/F2_7_WRONG_CLASS_CONCENTRATION_CONTROL_PROTOCOL.md
+            helena_clone/F2_7_DIAGNOSTIC_REPAIR_NOTE.md
           retention-days: 30
           if-no-files-found: warn
